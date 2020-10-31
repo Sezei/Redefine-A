@@ -1,3 +1,6 @@
 {
-	"LatestVersion": "v03-build4"
+	"LatestVersion": "v03-build4",
+	"BuildId": "58",
+	"UpdateType": "critical",
+	"LatestCriticalBuild": "58",
 }
