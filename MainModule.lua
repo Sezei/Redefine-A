@@ -5,8 +5,8 @@
   \___ \| __| | | |/ _` | |/ _ \  |  __| | '_ \ / _` | |
   ____) | |_| |_| | (_| | | (_) | | |____| | | | (_| | |
  |_____/ \__|\__,_|\__,_|_|\___/  |______|_| |_|\__, |_|
-	            	                        __/ |  
-       						|___/   
+	            	                             __/ |  
+       										    |___/   
 
 --------------------------------------------------------------
 
@@ -20,10 +20,7 @@ Warning: Redefine:A Plugins WILL NOT be applicable for Copyright, and must be op
 --------------------------------------------------------------
 
 All credits are in the loader.
-This is the first private build available for testing, and everyone receives a coded copy.
-Leak, and you will never receive those copies again. :)
-
-Copy for: EngiAdurite
+This is the first public beta build available for testing.
 
 --------------------------------------------------------------
 
@@ -31,10 +28,10 @@ DISCLAIMER
 ----------
 If the creator of the model is not "Studio Engi" or "EngiAdurite", then the model is FAKE!
 
-Make sure you only get the admin from the official site (studioengi.me) or from EngiAdurite to avoid backdoors!
+Make sure you only get the admin only from EngiAdurite or Studio Engi (Group) to avoid backdoors!
 
 If you got the model, but the model wasn't published by EngiAdurite or Studio Engi,
-Please report the incident to EngiAdurite on Roblox or Discord (Sezei#3061).
+Please report the incident to EngiAdurite on Roblox Devforum or Discord (Sezei#3061).
 
 
 Note for Developers
@@ -2478,9 +2475,7 @@ Your administration flag is ]]..isBan..[[.]]
 		end
 		if isBan == 5 then
 			if module.UpdateEnabled == true then
-				print("Module AutoUpdater is enabled! Checking if latest build is equal...")
 				if isHttpEnabled() == true then
-					print("HTTP is enabled.")
 					local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
@@ -2488,12 +2483,20 @@ Your administration flag is ]]..isBan..[[.]]
 						if tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
 							Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 						else
-							Notify(player,checkNew.UpdateType,"Notice: Redefine:A is outdated! The new version is "..checkNew.."!")
+							Notify(player,checkNew.UpdateType,"Notice: Redefine:A is outdated! The new version is "..checkNew.."! Since AutoUpdate is enabled, all you need to do is shutdown the server.")
 						end
 					end
 				else
-					print("HTTP is disabled.")
 					Notify(player,"error","HTTP Service is disabled, therefore we can't check if the version is up-to-date. The admin will still function properly, however.")
+				end
+			elseif module.UpdateEnabled == false then
+				if isHttpEnabled() == true then
+					local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
+					local checkNew = HttpService:JSONDecode(data)
+					if checkNew.LatestVersion == module.BuildVer then
+					elseif tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
+						Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
+					end
 				end
 			end
 		end
