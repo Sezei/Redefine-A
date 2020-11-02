@@ -26,7 +26,7 @@ Warning: Redefine:A Plugins WILL NOT be applicable for Copyright unless they are
 
 Setting up;
 
-Please scroll down and make sure to fill those sections;
+Please make sure to fill those sections;
 	RootAdmins
 	SuperAdmins
 	Admins
@@ -37,11 +37,11 @@ Please scroll down and make sure to fill those sections;
 	Prefix
 	Autosave
 
-Note; Failure to do so BEFORE the first admin initialisation will end up needing a datastorage reset.
+Note; Failure to do so BEFORE the first admin initialisation will end up needing a datastore reset.
 
 -------------------------------------------------------------
 
-Resetting datastorage in-case the previous step hasn't been followed;
+Resetting datastore in-case the previous step hasn't been followed;
 
 As Game Owner; 
 
@@ -84,16 +84,16 @@ If you want to copy the LPID system over to your own admin, please credit me for
 
 External Materials used in this system;	
 
-F3X Building Tools by GigsD4X (3.0.2)					| The Provided Building Tools.
+F3X Building Tools by GigsD4X (3.0.2)				| The Provided Building Tools.
 [!] Make sure httpService is enabled for full use of the Building Tools!
 	
 Studio Engi AGB Global Banlist by EngiAdurite 			| Optional External Banlist.
 
-Roundify by Stelrex										| Better UI Build.
+Roundify by Stelrex						| Better UI Build.
 
-Easy DataStorage Manager by VolcanoINC					| Easier Datastorage Access.
+Easy DataStorage Manager by VolcanoINC				| Easier Datastorage Access.
 
-Zeus Admin by TheKitDev									| This is literally the very Deluxe version of Zeus Admin.
+Zeus Admin by TheKitDev						| This is literally the Deluxe version of Zeus Admin.
 [!] No, the source isn't made by TheKitDev, but rather the whole idea is constructed by him.
 
 --------------------------------------------------------------
