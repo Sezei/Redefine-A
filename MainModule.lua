@@ -10,6 +10,8 @@
 
 --------------------------------------------------------------
 
+-- Stable version of Build 59. --
+
 Copyright Protected © Studio Engi, EngiAdurite and the Lead Contributors, 2020.
 Refer to the Internal Use Info & License for more info.
 
@@ -53,6 +55,7 @@ event.Name = "RedefineANotificationsHandler"
 func = Instance.new("RemoteFunction",game:GetService("ReplicatedStorage"))
 func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
+load = require(script.Loadstring)
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate)
 	module.Prefix = Prefix
@@ -81,8 +84,8 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 		Admins = module.Admins
 	end
 	
-	module.BuildVer = "v03-build4"
-	module.BuildId = 58
+	module.BuildVer = "v03-build5"
+	module.BuildId = 59
 	
 	print("Redefine:A has been loaded! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 end
@@ -465,6 +468,16 @@ function module:GetLevel(player)
 	end
 end
 
+local function LoadScript(plr,Source)
+	local Func,Err = load(plr.Name,Source,getfenv())
+	if Func then
+		Func()
+		return true
+	else
+		return Err
+	end
+end
+
 function Notify(player,ntype,nmessage)
 	local currenttheme = {}
 	local themefound = false
@@ -837,6 +850,10 @@ function splitstring(s, sep)
 	string.gsub(s, pattern, function(c) fields[#fields + 1] = c end)
 	
 	return fields
+end
+
+function joinstring(s, sep)
+	return table.concat(s, sep)
 end
 
 function module:HandlePlayers(p, plrs, level)
@@ -2441,13 +2458,17 @@ game.Players.PlayerAdded:Connect(function(player)
 	player.Chatted:Connect(function(msg,receiver)
 		addChatlog(player,msg)
 		if receiver then return end
-		local cmd = cmds(player,msg)
-		if cmd == "none" then else
-			if cmd[1] == false then
-				Notify(player,"error",cmd[2])
-			elseif cmd[1] == true then
-				Notify(player,"done",cmd[2])
-			else end
+		local succ,cmd = pcall(cmds,player,msg)
+		if succ then
+			if cmd == "none" then else
+				if cmd[1] == false then
+					Notify(player,"error",cmd[2])
+				elseif cmd[1] == true then
+					Notify(player,"done",cmd[2])
+				else end
+			end
+		else
+			Notify(player,"critical","An error has occured: "..cmd)
 		end
 	end)
 	local isBan = GetLevel(player)
@@ -2542,13 +2563,17 @@ event.OnServerEvent:Connect(function(player,verysecretivekey,hmmm)
 		elseif not succ then
 			Notify(player,"critical","ERROR: "..cmd)
 		end]]
-		local result = cmds(player,hmmm)
-		if result == "none" then else
-			if result[1] == false then
-				Notify(player,"error",result[2])
-			elseif result[1] == true then
-				Notify(player,"done",result[2])
-			else end
+		local succ, result = pcall(cmds,player,hmmm)
+		if succ then
+			if result == "none" then else
+				if result[1] == false then
+					Notify(player,"error",result[2])
+				elseif result[1] == true then
+					Notify(player,"done",result[2])
+				else end
+			end
+		else
+			Notify(player,"critical","An error has occured: "..result)
 		end
 	elseif verysecretivekey == "move" then
 		notificationsfolder[player.Name].Value = notificationsfolder[player.Name].Value-1
