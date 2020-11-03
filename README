@@ -1,4 +1,13 @@
-Found an issue? Please report it either indirectly in Issues, or contact me in Discord for critical glitches or bugs.
+Found an issue? Please report it either indirectly in Issues, or contact me directly in Discord for critical glitches or bugs.
+
+Issues template;
+Issue Type: [Desktop / Admin (Redefine:A)]
+Expected Behavior:
+What Actually Happens:
+Module Build [If Admin (Redefine:A)]:
+What Admin system are you using? [If Desktop]:
+
+---------------------------------------------------------------
 
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
@@ -10,7 +19,7 @@ Found an issue? Please report it either indirectly in Issues, or contact me in D
        				       	        |___/   
 
 ---------------------------------------------------------------
------------			Full Release of V.03			-----------
+-----------	    Full Release of V.03	    -----------
 ---------------------------------------------------------------
 
 Copyright Protected © Studio Engi, EngiAdurite and the Lead Contributors, 2020.
