@@ -1,4 +1,5 @@
-sfunc = game:GetService("ReplicatedStorage"):FindFirstChild("RA_DesktopEvent")
+local sfunc = game:GetService("ReplicatedStorage"):FindFirstChild("RA_DesktopEvent")
+local event = game:GetService("ReplicatedStorage"):FindFirstChild("RedefineANotificationsHandler")
 
 function pushPrint(pcolor,pstring)
 	for i = 1, 8, 1 do
@@ -67,6 +68,19 @@ function handleCommand(cmd)
 			end
 		end
 		pushPrint(Color3.fromRGB(255,255,255),join(txt," "))
+	elseif args[1] == "com" or args[1] == "command" or args[1] == "ra" or args[1] == "r:a" or args[1] == "redefine:a" then
+		if not args[2] then
+			pushPrint(Color3.fromRGB(255, 88, 88),"The command itself required.")
+			return
+		end
+		local txt = {}
+		for i,v in pairs(args) do
+			if i ~= 1 then
+				table.insert(txt,i-1,v)
+			end
+		end
+		event:FireServer("command", script.Parent.Parent.Parent.Parent.Parent.Prefix.Value..join(txt," "))
+		pushPrint(Color3.fromRGB(255,255,255),"Command has been sent.")
 	elseif args[1] == "trm" then
 		if not args[2] then
 			pushPrint(Color3.fromRGB(255, 88, 88),"Variable 1 is required. No, this is not a toy.")
@@ -153,6 +167,12 @@ script.Parent:GetPropertyChangedSignal("Text"):Connect(function()
 	if args[1] == "help" then
 		script.Parent.TextColor3 = Color3.fromRGB(127,255,127)
 	elseif args[1] == "print" or args[1] == "syserror" then
+		if args[2] then
+			script.Parent.TextColor3 = Color3.fromRGB(127,255,127)
+		else
+			script.Parent.TextColor3 = Color3.fromRGB(255,255,127)
+		end
+	elseif args[1] == "com" or args[1] == "command" or args[1] == "ra" or args[1] == "r:a" or args[1] == "redefine:a" then
 		if args[2] then
 			script.Parent.TextColor3 = Color3.fromRGB(127,255,127)
 		else
