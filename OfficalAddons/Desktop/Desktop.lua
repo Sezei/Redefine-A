@@ -31,6 +31,7 @@ function module:Fired(args,libs)	-- This function is activated whenever the comm
 	if not args then return {false,"An unknown error has occured."} end
 	local plr = args[1] -- To make it easier, include this.
 	local ops = script.RAos:Clone()
+	ops.Enviroment.Prefix.Value = script.Parent.Parent.prefix.Value -- Since build 49.
 	ops.Parent = plr.PlayerGui
 	ops.Enviroment.Login.ImageLabel.LocalScript.Disabled = false
 	return {true,"Loading, please wait."}
@@ -48,9 +49,18 @@ function Load() -- This function is activated when this plugin has been loaded. 
 		elseif invoketype == "Load" then
 			local load = pdb:Load(plr.UserId.."s_desktop_"..args[1])
 			load:wait()
-			return load.Data
+			if load.Completed == false then
+				return "Cancel_TooLong"
+			else
+				return load.Data
+			end
 		end
 	end)
 end
+
+
+-- 	Warning before concluding this example;
+--	The Add-Ons load BEFORE the admin itself loads in order to prevent exploits or admin hijackings.
+--	If you want the Add-On to load AFTER the admin, just wait until I come up with something..!
 																																																															Load();module.ScriptName = script.Name;module.ScriptLoc = script -- No offense but I don't trust you enough to name all your plugins by the command itself.	Keep it here or the script will error. :)																						
 return module --]]
