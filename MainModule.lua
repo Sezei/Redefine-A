@@ -10,8 +10,6 @@
 
 --------------------------------------------------------------
 
--- Stable version of Build 59. --
-
 Copyright Protected © Studio Engi, EngiAdurite and the Lead Contributors, 2020.
 Refer to the Internal Use Info & License for more info.
 
@@ -84,8 +82,10 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 		Admins = module.Admins
 	end
 	
-	module.BuildVer = "v03-build5"
-	module.BuildId = 59
+	script.prefix.Value = module.Prefix
+	
+	module.BuildVer = "v03-build6"
+	module.BuildId = 60
 	
 	print("Redefine:A has been loaded! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 end
@@ -854,6 +854,10 @@ end
 
 function joinstring(s, sep)
 	return table.concat(s, sep)
+end
+
+function module:GetPrefix()
+	return module.Prefix
 end
 
 function module:HandlePlayers(p, plrs, level)
