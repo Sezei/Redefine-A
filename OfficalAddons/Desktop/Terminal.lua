@@ -1,5 +1,6 @@
 local sfunc = game:GetService("ReplicatedStorage"):FindFirstChild("RA_DesktopEvent")
 local event = game:GetService("ReplicatedStorage"):FindFirstChild("RedefineANotificationsHandler")
+local newComs = {} -- :)
 
 function pushPrint(pcolor,pstring)
 	for i = 1, 8, 1 do
@@ -32,12 +33,30 @@ function join(s, sep)
 	return table.concat(s, sep)
 end
 
+function getCommand(name)
+	local folder = script.Parent.Parent.Parent.Parent.Parent.Parent.TerminalCommands
+	for _,v in pairs(folder:GetChildren()) do
+		local com = require(v)
+		if com.Name == name then
+			return com
+		end
+	end
+end
+
+function getArgsCommand(func)
+	return func.NeededArgs
+end
+
+function loadCommand(func,args)
+	return func:load(args)
+end
+
 function handleCommand(cmd)
 	pushPrint(Color3.fromRGB(255,255,127),"> "..cmd)
 	local args = splitstring(cmd," ")
 	
 	if args[1] == "help" then
-		pushPrint(Color3.fromRGB(255,255,255),"The current list of commands: help, set, syserror, print")
+		pushPrint(Color3.fromRGB(255,255,255),"The current list of commands: help,set,syserror,print,com")
 	elseif args[1] == "syserror" then
 		if not args[2] then
 			pushPrint(Color3.fromRGB(255, 88, 88),"At least one word is required. Please?")
@@ -157,6 +176,18 @@ function handleCommand(cmd)
 		else
 			pushPrint(Color3.fromRGB(255, 88, 88),"Variable 1 is invalid.")
 		end
+	elseif getCommand(args[1]) then
+		local func = getCommand(args[1])
+		
+		local Sargs = {}
+		for k,v in pairs(args) do
+			if k ~= 1 then
+				Sargs[k-1] = v
+			end
+		end
+		
+		local returns = loadCommand(func,Sargs)
+		pushPrint(returns[1],returns[2])
 	else
 		pushPrint(Color3.fromRGB(255,88,88),"Unknown command! Try typing 'help' for the list.")
 	end
@@ -200,6 +231,16 @@ script.Parent:GetPropertyChangedSignal("Text"):Connect(function()
 				script.Parent.TextColor3 = Color3.fromRGB(255,88,88)
 			end
 		else
+			script.Parent.TextColor3 = Color3.fromRGB(255,255,127)
+		end
+	elseif args[1] ~= nil and args[1] ~= "" and getCommand(args[1]) then
+		local neededargs = getArgsCommand(getCommand(args[1]))
+		if neededargs == 0 then
+			script.Parent.TextColor3 = Color3.fromRGB(127,255,127)
+		else
+			if ((#args)-1) == neededargs then
+				script.Parent.TextColor3 = Color3.fromRGB(127,255,127)
+			end
 			script.Parent.TextColor3 = Color3.fromRGB(255,255,127)
 		end
 	else
