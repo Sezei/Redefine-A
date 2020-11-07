@@ -84,8 +84,8 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 	
 	script.prefix.Value = module.Prefix
 	
-	module.BuildVer = "v03-build6"
-	module.BuildId = 60
+	module.BuildVer = "v03-build6A"
+	module.BuildId = 61
 	
 	print("Redefine:A has been loaded! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 end
@@ -1210,7 +1210,9 @@ function cmds(plr,command)
 	
 	commands[#commands+1] = {3,module.Prefix.."vip <Player>"} -- Not to be handled by the new handler.
 	if arg[1] == module.Prefix.."vip" then
-		if GetLevel(plr) < 3 then
+		if (GetLevel(plr) < 3 and arg[2] == "@me") or (GetLevel(plr) < 3 and arg[2] == plr.Name) then
+			return {false,"SUCCESS, U GAVE URSELF VIP.... NOT."}
+		elseif GetLevel(plr) < 3 then
 			return {false,"You do not have permission to execute this command."}
 		end
 		if not arg[2] then
@@ -1288,7 +1290,9 @@ function cmds(plr,command)
 	
 	commands[#commands+1] = {4,module.Prefix.."mod <Player>"}
 	if arg[1] == module.Prefix.."mod" then
-		if GetLevel(plr) < 4 then
+		if (GetLevel(plr) < 4 and arg[2] == "@me") or (GetLevel(plr) < 4 and arg[2] == plr.Name) then
+			return {false,"Moderation is currently disabled for this player."}
+		elseif GetLevel(plr) < 4 then
 			return {false,"You do not have permission to execute this command."}
 		end
 		if not arg[2] then
@@ -1365,7 +1369,9 @@ function cmds(plr,command)
 	
 	commands[#commands+1] = {4,module.Prefix.."admin <Player>"}
 	if arg[1] == module.Prefix.."admin" then
-		if GetLevel(plr) < 4 then
+		if (GetLevel(plr) < 4 and arg[2] == "@me") or (GetLevel(plr) < 3 and arg[2] == plr.Name) then
+			return {false,"Is admin really all you going for? Why not just "..module.Prefix.."super yourself, huh?"}
+		elseif GetLevel(plr) < 4 then
 			return {false,"You do not have permission to execute this command."}
 		end
 		if not arg[2] then
@@ -1443,7 +1449,9 @@ function cmds(plr,command)
 	
 	commands[#commands+1] = {5,module.Prefix.."super / superadmin <Player>"}
 	if arg[1] == module.Prefix.."super" or arg[1] == module.Prefix.."superadmin" then
-		if GetLevel(plr) < 5 then
+		if (GetLevel(plr) < 5 and arg[2] == "@me") or (GetLevel(plr) < 5 and arg[2] == plr.Name) then
+			return {false,"Credit for the attempt."}
+		elseif GetLevel(plr) < 5 then
 			return {false,"You do not have permission to execute this command."}
 		end
 		if not arg[2] then
@@ -1514,6 +1522,125 @@ function cmds(plr,command)
 				else
 					return {false,"Player not found OR You forgot to mark it as an alternative."} 
 				end end
+		end
+	end
+	
+	commands[#commands+1] = {4,module.Prefix.."unadmin <Player>"}
+	if arg[1] == module.Prefix.."unadmin" then
+		if (GetLevel(plr) < 2 and arg[2] == "@me") or (GetLevel(plr) < 2 and arg[2] == plr.Name) then
+			return {false,"Success, you have unadmined yourself... until you found you weren't an admin in the first place."}
+		elseif GetLevel(plr) < 5 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		if not arg[2] then
+			return {false,"A variable is required."}
+		end
+		if string.sub(arg[2],1,1) == "#" then
+			for _,v in pairs(usersfolder:GetChildren()) do
+				local nv = splitstring(v.Value," ")
+				if nv[1] == arg[2] then
+					local p = Player(nv[3])
+					if p then
+						if p.Name ~= plr.Name then
+							if GetLevel(p) < GetLevel(plr) then 
+								if GetLevel(p) <= 1 then
+									return {false,p.Name.." isn't an admin."}
+								end
+								for k,v in pairs(Admins.SuperAdmins) do
+									if v == p.UserId then
+										Admins.SuperAdmins[k] = nil
+									end
+								end
+								for k,v in pairs(Admins.Admins) do
+									if v == p.UserId then
+										Admins.Admins[k] = nil
+									end
+								end
+								for k,v in pairs(Admins.Moderators) do
+									if v == p.UserId then
+										Admins.Moderators[k] = nil
+									end
+								end
+								return {true,p.Name.." has been unadmined."}
+							elseif GetLevel(p) == 5 and GetLevel(plr) == 5 then
+								return {false,"Your linux terminal has crashed while attempting to remove sudo access from "..p.Name}
+							else
+								return {false,"You can't unadmin someone higher or equal to your level."}
+							end
+						else
+							return {false,"Nice try... Not."}
+						end
+					else
+						return {false,"An error has occured. Please try again later."}
+					end
+				end
+			end
+			return {false,"Local Player ID not found."}
+		else
+			local p = Player(arg[2])
+			if p then
+				if p.Name ~= plr.Name then
+					if GetLevel(p) < GetLevel(plr) then 
+						if GetLevel(p) <= 1 then
+							return {false,p.Name.." isn't an admin."}
+						end
+						for k,v in pairs(Admins.SuperAdmins) do
+							if v == p.UserId then
+								Admins.SuperAdmins[k] = nil
+							end
+						end
+						for k,v in pairs(Admins.Admins) do
+							if v == p.UserId then
+								Admins.Admins[k] = nil
+							end
+						end
+						for k,v in pairs(Admins.Moderators) do
+							if v == p.UserId then
+								Admins.Moderators[k] = nil
+							end
+						end
+						return {true,p.Name.." has been unadmined."}
+					else
+						return {false,"You can't unadmin someone higher or equal to your level."}
+					end
+				else
+					return {false,"..... Welp, you tried."}
+				end
+			else 
+				if arg[2] == "me" then
+					return {false,"Alternatives are disabled for this command."}
+				elseif arg[2] == "others" then
+					return {false,"Alternatives are disabled for this command."}
+				elseif arg[2] == "all" then
+					return {false,"Alternatives are disabled for this command."}
+				else
+					return {false,"Player was not found."} 
+				end
+			end
+		end
+	end
+	
+	commands[#commands+1] = {5,module.Prefix.."unban <UserId>"}
+	if arg[1] == module.Prefix.."unban" then
+		if arg[2] == "@me" or arg[2] == plr.Name or arg[2] == plr.UserId then
+			return {false,"👏👏👏 Congratulations. The command worked. 👏👏👏"}
+		elseif GetLevel(plr) < 5 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		if not arg[2] then
+			return {false,"A variable is required."}
+		end
+		local found = false
+		for k,v in pairs(Admins.BanLand) do
+			if v[1] == arg[2] then
+				Admins.BanLand[k] = nil
+				found = true
+			end
+		end
+		if found == true then
+			return {true,arg[2].." has been unbanned. (Remember to do "..module.Prefix.."saveadmins !)"}
+		else
+			return {true,arg[2].." wasn't found in the banlist. [Did you search by UserId?]"}
 		end
 	end
 	
