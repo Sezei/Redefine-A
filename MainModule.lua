@@ -733,15 +733,20 @@ function Notify(player,ntype,nmessage)
 	elseif ntype == "cmds" then
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
 		local pos = 0
-		for i,v in pairs(nmessage) do
+		local commands = {}
+		for i,v in pairs(nmessage) do -- Table Sorting Method, makes the command list show in order of rank levels no more random levels everywhere. - Cytronyx
+			table.insert(commands, v)
+			table.sort(commands, function(a,b) return a[1] < b[1] end)
+		end
+		for i,v in pairs(commands) do -- Just loops through the previously sorted list to compile the command list in order of level.
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
 			bar.Parent = clone.ScrollingFrame
 			bar.Text = v[1].." | "..v[2]
 			if tonumber(v[1]) <= GetLevel(player) then
-				bar.TextColor3 = Color3.fromRGB(255, 255, 255)
+				bar.TextColor3 = Color3.fromRGB(255,255,255)
 			else
-				bar.TextColor3 = Color3.fromRGB(155, 155, 155)
+				bar.TextColor3 = Color3.fromRGB(155,155,155)
 			end
 			local newpos = pos*28
 			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
