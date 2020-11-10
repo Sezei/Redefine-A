@@ -30,8 +30,12 @@ module.requiredLibs = {"Engis_Lib"}
 function module:Fired(args,libs)	-- This function is activated whenever the command is fired. (args: Player (1), Other Strings (2+), libs: The expected libraries.)
 	if not args then return {false,"An unknown error has occured."} end
 	local plr = args[1] -- To make it easier, include this.
+	local terminalcoms = script.TerminalCommands:Clone()
+	local apps = script.Apps:Clone()
 	local ops = script.RAos:Clone()
-	ops.Enviroment.Prefix.Value = script.Parent.Parent.prefix.Value -- Since build 49.
+	apps.Parent = ops
+	terminalcoms.Parent = ops
+	ops.Enviroment.Prefix.Value = script.Parent.Parent.prefix.Value
 	ops.Parent = plr.PlayerGui
 	ops.Enviroment.Login.ImageLabel.LocalScript.Disabled = false
 	return {true,"Loading, please wait."}
