@@ -10,6 +10,13 @@
 
 --------------------------------------------------------------
 
+This is a community update by both EngiAdurite and Cytronyx.
+Thank you very much for the help, Cytronyx!
+You can help too by making pull requests in the official Github;
+greasemonkey123/Redefine-A
+
+--------------------------------------------------------------
+
 Copyright Protected © Studio Engi, EngiAdurite and the Lead Contributors, 2020.
 Refer to the Internal Use Info & License for more info.
 
@@ -53,7 +60,7 @@ event.Name = "RedefineANotificationsHandler"
 func = Instance.new("RemoteFunction",game:GetService("ReplicatedStorage"))
 func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
-load = require(script.Loadstring)
+loader = require(script.Loadstring)
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate)
 	module.Prefix = Prefix
@@ -71,22 +78,22 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 	module.LegacyEnabled = LegacyUI or false
 	module.UpdateEnabled = AutoUpdate or false
 	gameSecret = "RedefineA_"..game.CreatorId
-	
+
 	if module.EnableGlobalBanList == true then
 		require(2498483497)
 	end
-	
+
 	if not Admins or Admins == nil then
 		local Save = db:Save("AdminList",module.Admins)
 		Save:wait()
 		Admins = module.Admins
 	end
-	
+
 	script.prefix.Value = module.Prefix
-	
-	module.BuildVer = "v03-build6A"
-	module.BuildId = 61
-	
+
+	module.BuildVer = "v03.1-pre2"
+	module.BuildId = 63
+
 	print("Redefine:A has been loaded! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 end
 
@@ -94,7 +101,7 @@ end
 	Please do not edit anything below this line unless you know what you're doing.
 	Support for custom commands is already here! (module > Add-Ons)
 --]]
-	
+
 Themes = {}
 CustomCommands = {}
 Extras = {} -- Libraries and undefined stuff.
@@ -201,7 +208,7 @@ Themes[#Themes+1] = { -- Sea
 		}
 	}
 }
-	
+
 resetactivated = false -- Please keep it at false. This is a very important fail-safe!
 
 pcall(function()
@@ -252,7 +259,7 @@ function CheckforLibs(requiredlibs)
 			missinglibs[a] = a
 		end
 	end
-	
+
 	if found then return libs
 	else return {false,missinglibs}
 	end
@@ -268,11 +275,11 @@ function firePlugin(name,args)
 			break
 		end
 	end
-	
+
 	if found == false then
 		return {false,"An error has occured searching for the add-on.."}
 	end
-	
+
 	local action = firedplugin:Fired(args)
 	return action
 end
@@ -360,19 +367,19 @@ function GetLevel(player)
 				return -99
 			end
 		end
-		
+
 		if module.VIPAdmin.Enabled == true then
 			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,module.VIPAdmin.GamepassId) == true then
 				return module.VIPAdmin.GiveLevel
 			end
 		end
-		
+
 		if module.VIPAllowed == true then
 			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,8197340) == true then
 				return 1
 			end
 		end
-		
+
 		return 0
 	end
 end
@@ -451,31 +458,49 @@ function module:GetLevel(player)
 				return -99
 			end
 		end
-		
+
 		if module.VIPAdmin.Enabled == true then
 			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,module.VIPAdmin.GamepassId) == true then
 				return module.VIPAdmin.GiveLevel
 			end
 		end
-		
+
 		if module.VIPAllowed == true then
 			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,8197340) == true then
 				return 1
 			end
 		end
-		
+
 		return 0
 	end
 end
 
 local function LoadScript(plr,Source)
-	local Func,Err = load(plr.Name,Source,getfenv())
+	local Func,Err = loader(plr.Name,Source,getfenv())
 	if Func then
 		Func()
 		return true
 	else
 		return Err
 	end
+end
+
+local function isType(Id,Type)
+	if tonumber(Id) then
+		local set
+		local succ,err = pcall(function()
+			set = game:GetService("MarketplaceService"):GetProductInfo(tonumber(Id))
+		end)
+		if succ then
+			if set.AssetTypeId == Type then
+				return true
+			end
+		else
+			warn("Error getting asset: "..err)
+			return false
+		end
+	end
+	return false
 end
 
 function Notify(player,ntype,nmessage)
@@ -564,7 +589,11 @@ function Notify(player,ntype,nmessage)
 		new.MouseButton1Click:Connect(function()
 			new.Click:Play()
 			new.Visible = false
-			wait(1)
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer:TweenSize(UDim2.new(0,0,0,2),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,math.max(10,(#nmessage/75)),true,function()
+			new.Visible = false
 			new:Destroy()
 		end)
 	elseif ntype == "done" then
@@ -597,7 +626,11 @@ function Notify(player,ntype,nmessage)
 		new.MouseButton1Click:Connect(function()
 			new.Click:Play()
 			new.Visible = false
-			wait(1)
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer:TweenSize(UDim2.new(0,0,0,2),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,math.max(3,(#nmessage/70)),true,function()
+			new.Visible = false
 			new:Destroy()
 		end)
 	elseif ntype == "error" then
@@ -630,7 +663,11 @@ function Notify(player,ntype,nmessage)
 		new.MouseButton1Click:Connect(function()
 			new.Click:Play()
 			new.Visible = false
-			wait(1)
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer:TweenSize(UDim2.new(0,0,0,2),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,math.max(5,(#nmessage/75)),true,function()
+			new.Visible = false
 			new:Destroy()
 		end)
 	elseif ntype == "critical" then -- Added in 03. Made for errors in the custom commands.
@@ -665,7 +702,11 @@ function Notify(player,ntype,nmessage)
 		new.MouseButton1Click:Connect(function()
 			new.Click:Play()
 			new.Visible = false
-			wait(1)
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer:TweenSize(UDim2.new(0,0,0,2),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,math.max(60,(#nmessage/30)),true,function()
+			new.Visible = false
 			new:Destroy()
 		end)
 	elseif ntype == "notification" then
@@ -697,6 +738,11 @@ function Notify(player,ntype,nmessage)
 		new.Notification:Play()
 		new.MouseButton1Click:Connect(function()
 			new.Click:Play()
+			new.Visible = false
+			wait(1)
+			new:Destroy()
+		end)
+		new.Timer:TweenSize(UDim2.new(0,0,0,2),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,math.max(10,(#nmessage/30)),true,function()
 			new.Visible = false
 			wait(1)
 			new:Destroy()
@@ -733,15 +779,20 @@ function Notify(player,ntype,nmessage)
 	elseif ntype == "cmds" then
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
 		local pos = 0
-		for i,v in pairs(nmessage) do
+		local commands = {}
+		for i,v in pairs(nmessage) do -- Table sorter by Cytronyx.
+			table.insert(commands, v)
+			table.sort(commands, function(a,b) return a[1] < b[1] end)
+		end
+		for i,v in pairs(commands) do
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
 			bar.Parent = clone.ScrollingFrame
 			bar.Text = v[1].." | "..v[2]
 			if tonumber(v[1]) <= GetLevel(player) then
-				bar.TextColor3 = Color3.fromRGB(255, 255, 255)
+				bar.TextColor3 = Color3.fromRGB(255,255,255)
 			else
-				bar.TextColor3 = Color3.fromRGB(155, 155, 155)
+				bar.TextColor3 = Color3.fromRGB(155,155,155)
 			end
 			local newpos = pos*28
 			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
@@ -834,21 +885,21 @@ end
 chatlogs = {}
 
 function Player(Name)
-    for i,v in next,game:GetService("Players"):GetPlayers() do
-        local s1 = string.lower(v.Name)
-        if s1:sub(1, #Name) == string.lower(Name) then
-            return v
-        end
-    end
+	for i,v in next,game:GetService("Players"):GetPlayers() do
+		local s1 = string.lower(v.Name)
+		if s1:sub(1, #Name) == string.lower(Name) then
+			return v
+		end
+	end
 end
 
 function splitstring(s, sep)
 	local fields = {}
-	
+
 	local sep = sep or " "
 	local pattern = string.format("([^%s]+)", sep)
 	string.gsub(s, pattern, function(c) fields[#fields + 1] = c end)
-	
+
 	return fields
 end
 
@@ -864,12 +915,12 @@ function module:HandlePlayers(p, plrs, level)
 	if plrs == "" or plrs == " " then
 		return Player(p)
 	end
-	
+
 	local newplrs = splitstring(plrs,",")
 	local players = {}
 	local executor = p
 	local ismsg = false
-	
+
 	if GetLevel(Player(executor)) == 5 then
 		level = 0 -- If the executor is Root, then ignore level.
 	end
@@ -878,7 +929,7 @@ function module:HandlePlayers(p, plrs, level)
 		ismsg = true
 		level = 0
 	end
-	
+
 	for _,v in pairs(newplrs) do
 		if v == "@me" then
 			players[#players+1] = Player(executor)
@@ -1006,7 +1057,7 @@ function module:HandlePlayers(p, plrs, level)
 			end
 		end
 	end
-	
+
 	return players
 end
 
@@ -1018,13 +1069,13 @@ function cmds(plr,command)
 	local arg = splitstring(command," ")
 	local commands = {}
 	local buildreason = nil -- Resets the reason every execution of command. (00E)
-	
+
 	commands[#commands+1] = {2,module.Prefix.."kill [Players]"}
 	if arg[1] == module.Prefix.."kill" then
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1048,13 +1099,13 @@ function cmds(plr,command)
 			return {true,"Successfully killed "..done[2].."."}
 		end
 	end
-		
+
 	commands[#commands+1] = {2,module.Prefix.."smite [Players]"}
 	if arg[1] == module.Prefix.."smite" then
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1094,7 +1145,7 @@ function cmds(plr,command)
 			return {true,"Successfully smitted "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."kick <Players> [Reason]"}
 	if arg[1] == module.Prefix.."kick" then
 		if GetLevel(plr) < 3 then
@@ -1103,7 +1154,7 @@ function cmds(plr,command)
 		if not arg[2] then
 			return {false,"You didn't include anyone to kick."}
 		end
-		
+
 		if arg[3] then
 			buildreason = ""
 			for _,v in pairs(arg) do
@@ -1112,7 +1163,7 @@ function cmds(plr,command)
 				end
 			end
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1136,7 +1187,7 @@ function cmds(plr,command)
 			return {true,"Successfully kicked "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."speed <Players> <Value>"}
 	if arg[1] == module.Prefix.."speed" then
 		if GetLevel(plr) < 2 then
@@ -1148,9 +1199,9 @@ function cmds(plr,command)
 		if not arg[3] then
 			return {false,"A speed value hasn't been mentioned. (Default Speed is 16)"}
 		end
-		
+
 		local speed = tonumber(arg[3])
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1174,13 +1225,13 @@ function cmds(plr,command)
 			return {true,"Successfully sped up "..done[2].."."}
 		end
 	end
-		
+
 	commands[#commands+1] = {4,module.Prefix.."f3x / btools [Player]"}
 	if arg[1] == module.Prefix.."f3x" or arg[1] == module.Prefix.."btools" then
 		if GetLevel(plr) < 4 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1207,7 +1258,7 @@ function cmds(plr,command)
 			return {true,"Successfully gave "..done[2].." F3X."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."vip <Player>"} -- Not to be handled by the new handler.
 	if arg[1] == module.Prefix.."vip" then
 		if (GetLevel(plr) < 3 and arg[2] == "@me") or (GetLevel(plr) < 3 and arg[2] == plr.Name) then
@@ -1287,7 +1338,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	commands[#commands+1] = {4,module.Prefix.."mod <Player>"}
 	if arg[1] == module.Prefix.."mod" then
 		if (GetLevel(plr) < 4 and arg[2] == "@me") or (GetLevel(plr) < 4 and arg[2] == plr.Name) then
@@ -1366,7 +1417,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	commands[#commands+1] = {4,module.Prefix.."admin <Player>"}
 	if arg[1] == module.Prefix.."admin" then
 		if (GetLevel(plr) < 4 and arg[2] == "@me") or (GetLevel(plr) < 3 and arg[2] == plr.Name) then
@@ -1446,7 +1497,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	commands[#commands+1] = {5,module.Prefix.."super / superadmin <Player>"}
 	if arg[1] == module.Prefix.."super" or arg[1] == module.Prefix.."superadmin" then
 		if (GetLevel(plr) < 5 and arg[2] == "@me") or (GetLevel(plr) < 5 and arg[2] == plr.Name) then
@@ -1524,7 +1575,7 @@ function cmds(plr,command)
 				end end
 		end
 	end
-	
+
 	commands[#commands+1] = {4,module.Prefix.."unadmin <Player>"}
 	if arg[1] == module.Prefix.."unadmin" then
 		if (GetLevel(plr) < 2 and arg[2] == "@me") or (GetLevel(plr) < 2 and arg[2] == plr.Name) then
@@ -1619,7 +1670,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	commands[#commands+1] = {5,module.Prefix.."unban <UserId>"}
 	if arg[1] == module.Prefix.."unban" then
 		if arg[2] == "@me" or arg[2] == plr.Name or arg[2] == plr.UserId then
@@ -1643,7 +1694,7 @@ function cmds(plr,command)
 			return {true,arg[2].." wasn't found in the banlist. [Did you search by UserId?]"}
 		end
 	end
-	
+
 	commands[#commands+1] = {5,module.Prefix.."ban <Player> [Reason]"}
 	if arg[1] == module.Prefix.."ban" then
 		local banreason = ""
@@ -1653,7 +1704,7 @@ function cmds(plr,command)
 		if not arg[2] then
 			return {false,"You didn't mention anyone to ban."}
 		end
-		
+
 		if not arg[3] then
 			banreason = module.DefaultBanReason
 		else
@@ -1663,7 +1714,7 @@ function cmds(plr,command)
 				end
 			end
 		end
-		
+
 		if arg[2] == "@all" then
 			return {false,"Alternatives that include multiple people are disabled for this command."}
 		elseif arg[2] == "@others" then
@@ -1710,13 +1761,13 @@ function cmds(plr,command)
 			else return {false,"Player not found. Also, no alternatives are allowed here."} end
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."fly [Player]"}
 	if arg[1] == module.Prefix.."fly" then
 		if GetLevel(plr) < 3 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		if not arg[2] then
 			if not plr.Character:FindFirstChild("fly") then
 				local fly = script.fly:Clone()
@@ -1754,18 +1805,18 @@ function cmds(plr,command)
 			return {true,"Successfully made "..done[2].." fly."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."n / notify <Player> <Value>"}
 	if arg[1] == module.Prefix.."n" or arg[1] == module.Prefix.."notify" or arg[1] == module.Prefix.."notification" then
 		local buildreason = "yes hi"
-		
+
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
 		if not arg[2] then
 			return {false,"You didn't include anyone to notify"}
 		end
-		
+
 		if arg[3] then
 			buildreason = ""
 			for _,v in pairs(arg) do
@@ -1774,7 +1825,7 @@ function cmds(plr,command)
 				end
 			end
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1798,7 +1849,7 @@ function cmds(plr,command)
 			return {true,"Successfully notified "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."critical <Player> <Value>"}
 	if arg[1] == module.Prefix.."critical" then
 		local buildreason = "yes hi"
@@ -1842,18 +1893,18 @@ function cmds(plr,command)
 			return {true,"Successfully notified "..done[2].."."}
 		end
 	end
-		
+
 	commands[#commands+1] = {3,module.Prefix.."m / message <Player> <Value>"}	
 	if arg[1] == module.Prefix.."m" or arg[1] == module.Prefix.."message" then
 		local buildreason = ""
-		
+
 		if GetLevel(plr) < 3 then
 			return {false,"You do not have permission to execute this command."}
 		end
 		if not arg[2] then
 			return {false,"You didn't include anyone to message. If you want to message everyone, use "..module.Prefix.."broadcast."}
 		end
-		
+
 		if arg[3] then
 			buildreason = ""
 			for _,v in pairs(arg) do
@@ -1862,7 +1913,7 @@ function cmds(plr,command)
 				end
 			end
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],-1)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1886,13 +1937,13 @@ function cmds(plr,command)
 			return {true,"Successfully notified "..done[2].."."}
 		end
 	end
-			
+
 	commands[#commands+1] = {3,module.Prefix.."b / broadcast <Value>"} -- no handle
 	if arg[1] == module.Prefix.."b" or arg[1] == module.Prefix.."broadcast" then
 		if GetLevel(plr) < 3 then
 			return {false,"You do not have permission to execute this command."}
 		end
-			
+
 		if arg[2] then
 			buildreason = ""
 			for _,v in pairs(arg) do
@@ -1901,15 +1952,15 @@ function cmds(plr,command)
 				end
 			end
 		end
-		
+
 		for _,v in pairs(game.Players:GetPlayers()) do
 			local new = script.FullScreenNotification:Clone()
 			Notify(v,"newmsg",{"Message by "..plr.Name,buildreason or "?"})
 		end
-		
+
 		return{true,"Success."}
 	end
-	
+
 	commands[#commands+1] = {1,module.Prefix.."fire / burn [Player]"} -- VIP command
 	if arg[1] == module.Prefix.."fire" or arg[1] == module.Prefix.."burn" then
 		if GetLevel(plr) < 1 then
@@ -1924,7 +1975,7 @@ function cmds(plr,command)
 				return {false,"You're already burning!"}
 			end
 		end
-		
+
 		if arg[2] == "@all" then
 			if GetLevel(plr) < 3 then
 				return {false,"You do not have permission to execute this command on others."}
@@ -1965,7 +2016,7 @@ function cmds(plr,command)
 			if GetLevel(plr) < 3 then
 				return {false,"You do not have permission to execute this command on others."}
 			end	
-					
+
 			for _,v in pairs(usersfolder:GetChildren()) do
 				local nv = splitstring(v.Value," ")
 				if nv[1] == arg[2] then
@@ -2010,7 +2061,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	commands[#commands+1] = {1,module.Prefix.."unfire / extinguish [Player]"} -- VIP command
 	if arg[1] == module.Prefix.."unfire" or arg[1] == module.Prefix.."extinguish" then
 		if GetLevel(plr) < 1 then
@@ -2024,7 +2075,7 @@ function cmds(plr,command)
 				return {false,"You're not on flames."}
 			end
 		end
-		
+
 		if arg[2] == "@all" then
 			if GetLevel(plr) < 3 then
 				return {false,"You do not have permission to execute this command on others."}
@@ -2101,7 +2152,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-			
+
 	commands[#commands+1] = {1,module.Prefix.."sparkle [Player]"} -- VIP command
 	if arg[1] == module.Prefix.."sparkle" then
 		if GetLevel(plr) < 1 then
@@ -2116,7 +2167,7 @@ function cmds(plr,command)
 				return {false,"You're already sparkling!"}
 			end
 		end
-		
+
 		if arg[2] == "@all" then
 			if GetLevel(plr) < 3 then
 				return {false,"You do not have permission to execute this command on others."}
@@ -2201,7 +2252,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	commands[#commands+1] = {1,module.Prefix.."unsparkle [Player]"} -- VIP command
 	if arg[1] == module.Prefix.."unsparkle" then
 		if GetLevel(plr) < 1 then
@@ -2215,7 +2266,7 @@ function cmds(plr,command)
 				return {false,"You're not sparkling."}
 			end
 		end
-		
+
 		if arg[2] == "@all" then
 			if GetLevel(plr) < 3 then
 				return {false,"You do not have permission to execute this command on others."}
@@ -2292,17 +2343,17 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."bring <Player>"}
 	if arg[1] == module.Prefix.."bring" then
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		if not arg[2] then
 			return {false,"You must include someone you want to bring."}
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -2329,17 +2380,17 @@ function cmds(plr,command)
 			return {true,"Successfully notified "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."to <Player/@random>"} -- Special handler, ignoring
 	if arg[1] == module.Prefix.."to" then
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		if not arg[2] then
 			return {false,"You must include someone you want to teleport to."}
 		end
-		
+
 		if arg[2] == "@all" then
 			return {false,"Alternatives are disabled for this command."}
 		elseif arg[2] == "@others" then
@@ -2363,7 +2414,7 @@ function cmds(plr,command)
 					end
 				end
 			end
-			
+
 			local r = Player(random)
 			if (plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character.HumanoidRootPart:IsA("BasePart")) then
 				plr.Character.HumanoidRootPart.Velocity = Vector3.new()
@@ -2404,35 +2455,34 @@ function cmds(plr,command)
 			else return {false,"Player not found."} end
 		end
 	end
-	
+
 	commands[#commands+1] = {1,module.Prefix.."hat <HatId>"} -- VIP command
 	if arg[1] == module.Prefix.."hat" then
 		if GetLevel(plr) < 1 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		if not arg[2] then
 			return {false,"You must include an ID for this command."}
 		end
-		
-		local LoadAsset = pcall(game.InsertService:LoadAsset(tonumber(arg[2])))
-		local hat = LoadAsset:GetChildren()
-		if #hat < 1 then
-			return {false,"Failed to get hat. Please try again later or check for mis-copy."}
-		end
-		hat = hat[1]
-		if not hat:IsA("Hat") and not hat:IsA("Accoutrement") and not hat:IsA("Accessory") then
-			return {false, "This is not a hat! >:c"}
-		end
-		if hat:IsA("Accessory") then
-			plr.Character.Humanoid:AddAccessory(hat:Clone());
-			return {true,"Done!"}
-		else
-			hat:Clone().Parent = plr.Character
-			return {true,"Done!"}
+
+		if isType(arg[2],8) or isType(arg[2],41) or isType(arg[2],42) or isType(arg[2],43) or isType(arg[2],44) or isType(arg[2],45) or isType(arg[2], 46) then
+			local hat = game:GetService("InsertService"):LoadAsset(arg[2]):GetChildren()[1] if not hat then return {false,"Failed to get hat."} end
+			if hat:IsA('Accoutrement') then
+				for amount,itemtype in pairs(hat:GetDescendants()) do
+					if itemtype:IsA('Script') then
+						itemtype:Destroy()
+					end
+				end
+				hat.Parent = plr.Character
+				return {true,"Success."}
+			else
+				hat:Destroy()
+				return {false,"That was not... a hat. Hat is a thing you wear. But that? Nuh uh."}
+			end
 		end
 	end
-	
+
 	commands[#commands+1] = {5,module.Prefix.."saveadmins"}
 	if arg[1] == module.Prefix.."saveadmins" then
 		if GetLevel(plr) < 5 then
@@ -2443,21 +2493,21 @@ function cmds(plr,command)
 			return {true, "Successfully saved current Admin List."}
 		end
 	end
-	
+
 	commands[#commands+1] = {5,module.Prefix.."resetadmins <GameSecret>"} -- WARNING | USING THIS COMMAND WILL REMOVE ALL SAVED ADMINS AND WILL USE THE ADMINS STATED IN THE MODULE! 
 	if arg[1] == module.Prefix.."resetadmins" then
 		if GetLevel(plr) < 5 then
 			return {false,"You do not have permission to execute this command!"}
 		end
-		
+
 		if not arg[2] then
 			return {false,"You didn't state the Game Secret."}
 		end
-		
+
 		if arg[2] ~= gameSecret then
 			return {false,"Wrong Game Secret."}
 		end
-		
+
 		if resetactivated == false then
 			resetactivated = true
 			return {false, "Warning! Using this command will reset all admins! To confirm, re-do this command."}
@@ -2470,32 +2520,32 @@ function cmds(plr,command)
 			end
 		end
 	end
-		
+
 	commands[#commands+1] = {1,module.Prefix.."lpid"} -- No handler
 	if arg[1] == module.Prefix.."lpid" then
 		if GetLevel(plr) < 1 then
 			return {false,"You do not have permission to execute this command!"}
 		end
-		
+
 		Notify(plr,"lpids",commands)
 		return {true,"Showing the Local Player IDs for all of the players."}
 	end
-	
+
 	commands[#commands+1] = {1,module.Prefix.."admins"} -- No handler
 	if arg[1] == module.Prefix.."admins" or arg[1] == module.Prefix.."staff" then
 		Notify(plr,"onlineadmins",commands)
 		return {true,"Showing the Local Player IDs for all of the players."}
 	end
-	
+
 	-- Custom Commands loaded from Add-Ons.
-		
+
 	for _,v in pairs(CustomCommands) do
 		local plevel = v["requiredLevel"]
 		local pusage = v["Usage"]
 		local pName = v["pName"]
-		
+
 		commands[#commands+1] = {plevel,(module.Prefix..pName.." "..pusage)}
-		
+
 		if arg[1] == (module.Prefix..pName) then
 			local collectedargs = {}
 			local libs = {}
@@ -2505,11 +2555,11 @@ function cmds(plr,command)
 					collectedargs[#collectedargs+1] = a
 				end
 			end
-			
+
 			if v["requiredLevel"] > GetLevel(plr) then
 				return {false,"You do not have permission to execute this command!"}
 			end
-			
+
 			local lib = CheckforLibs(v["requiredLibs"])
 			if lib[1]==false then
 				warn("---------- REDEFINE:A | BEGIN WARNING: MISSING LIBRARIES -----------")
@@ -2521,24 +2571,24 @@ function cmds(plr,command)
 			else
 				libs = lib
 			end
-			
+
 			if v["requiredParameters"] > (#collectedargs-1) then
 				return {false,"This command is requiring "..v["requiredParameters"].." arguments. You are missing "..v["requiredParameters"]-#collectedargs.."."}
 			end
-			
+
 			local task = firePlugin(pName,collectedargs,libs)
 			return task
 		end
 	end
-	
+
 	-- End of the Custom Commands section.
-	
+
 	commands[#commands+1] = {2,module.Prefix.."chatlogs"}
 	if arg[1] == module.Prefix.."chatlogs" then
 		Notify(plr,"chatlogs",commands)
 		return {true,"Showing the currently logged ("..(#chatlogs+1)..") chatlogs."}
 	end
-	
+
 	commands[#commands+1] = {-1,module.Prefix.."about"}
 	if arg[1] == module.Prefix.."about" then -- Not cloning this one for the theme. Better let them experience the vanilla (Light) feel of R:A.
 		local new = script.About:Clone()
@@ -2547,7 +2597,7 @@ function cmds(plr,command)
 		new.Parent = plr.PlayerGui
 		return "none"
 	end
-		
+
 	commands[#commands+1] = {-1,module.Prefix.."verify"}
 	if arg[1] == module.Prefix.."verify" then
 		if plr:GetRankInGroup(3984407) >= 4  then
@@ -2561,31 +2611,31 @@ function cmds(plr,command)
 			return {false, "This command is only for Studio Engi Administration Team."}
 		end
 	end
-	
+
 	-- If you're making custom commands inside the module for any reason, leave this part LAST!
-	
+
 	if arg[1] == module.Prefix.."cmds" then
 		Notify(plr,"cmds",commands)
 		return {true,"Showing the loaded "..(#commands+1).." commands."}
 	end
 	return "none"
 end
-	
+
 
 game.Players.PlayerAdded:Connect(function(player)
 	print("R:A Debug | Player "..player.Name.." has connected.")
 	local newinstance = Instance.new("NumberValue",notificationsfolder)
 	newinstance.Name = player.Name
 	Instance.new("Folder",player).Name = "Notifications"
-	
+
 	userids = userids+1
 	local pid = Instance.new("StringValue",usersfolder)
 	pid.Name = player.Name
 	pid.Value = "#"..userids.." | "..player.Name.." ("..GetLevel(player)..")"
-	
+
 	local newUI = script.MainUI:Clone()
 	newUI.Parent = player.PlayerGui
-	
+
 	player.Chatted:Connect(function(msg,receiver)
 		addChatlog(player,msg)
 		if receiver then return end
