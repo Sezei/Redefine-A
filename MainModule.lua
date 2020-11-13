@@ -10,8 +10,9 @@
 
 --------------------------------------------------------------
 
-This is an update mainly made to fix issues with the new settings command that I didn't release in the devforums because the admins hate me. :<
-You can help with newer versions by making pull requests in the official Github;
+This is a community update by both EngiAdurite and Cytronyx.
+Thank you very much for the help, Cytronyx!
+You can help too by making pull requests in the official Github;
 greasemonkey123/Redefine-A
 
 --------------------------------------------------------------
@@ -90,10 +91,100 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 
 	script.prefix.Value = module.Prefix
 
-	module.BuildVer = "v03.1-pre3A"
-	module.BuildId = 65
+	module.BuildVer = "v03.1-pre3B"
+	module.BuildId = 66
 
 	print("Redefine:A has been loaded! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
+	
+	print("Redefine:A | Checking for players that already exist.")
+
+	for _,player in pairs(game.Players:GetPlayers()) do
+		print("R:A Debug | Checking if "..player.Name.." was already handled.")
+		if not usersfolder:FindFirstChild(player.Name) then
+			print("R:A Debug | Player "..player.Name.." wasn't handled. Handling player...")
+			local newinstance = Instance.new("NumberValue",notificationsfolder)
+			newinstance.Name = player.Name
+			Instance.new("Folder",player).Name = "Notifications"
+
+			userids = userids+1
+			local pid = Instance.new("StringValue",usersfolder)
+			pid.Name = player.Name
+			pid.Value = "#"..userids.." | "..player.Name.." ("..GetLevel(player)..")"
+
+			local newUI = script.MainUI:Clone()
+			newUI.Parent = player.PlayerGui
+
+			player.Chatted:Connect(function(msg,receiver)
+				addChatlog(player,msg)
+				if receiver then return end
+				local succ,cmd = pcall(cmds,player,msg)
+				if succ then
+					if cmd == "none" then else
+						if cmd[1] == false then
+							Notify(player,"error",cmd[2])
+						elseif cmd[1] == true then
+							Notify(player,"done",cmd[2])
+						else end
+					end
+				else
+					Notify(player,"critical","An error has occured: "..cmd)
+				end
+			end)
+			local isBan = GetLevel(player)
+			if isBan == -99 then
+				for _,v in pairs(Admins.BanLand) do
+					if v[1] == player.UserId then
+						if v[2] then
+							reason = v[2]
+						else
+							reason = module.DefaultBanReason
+						end
+					end
+				end
+				player:Kick(module.BanMessage.." "..reason)
+			else
+				print(player.Name.." | "..isBan)
+				local new = script.Welcome:Clone()
+				newUI.Main.AboutFrame.Label.Text = [[This game is powered by the Redefine:A Administration System, created by Studio Engi.
+
+Your administration flag is ]]..isBan..[[.]]
+				if isBan >= 1 then
+					Notify(player,"welcome","Welcome! This game is using Redefine:A. Your Admin level is "..isBan..".")
+					newUI.Main.CmdBar.ImageButton.LocalScript.Disabled = false
+					newUI.Main.CmdBar.Prefix.Value = module.Prefix
+				end
+				if isBan == 5 then
+					if module.UpdateEnabled == true then
+						if isHttpEnabled() == true then
+							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
+							local checkNew = HttpService:JSONDecode(data)
+							if checkNew.LatestVersion == module.BuildVer then
+							else
+								if tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
+									Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
+								else
+									Notify(player,checkNew.UpdateType,"Notice: Redefine:A is outdated! The new version is "..checkNew.LatestVersion.."! Since AutoUpdate is enabled, all you need to do is shutdown the server.")
+								end
+							end
+						else
+							Notify(player,"error","HTTP Service is disabled, therefore we can't check if the version is up-to-date. The admin will still function properly, however.")
+						end
+					elseif module.UpdateEnabled == false then
+						if isHttpEnabled() == true then
+							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
+							local checkNew = HttpService:JSONDecode(data)
+							if checkNew.LatestVersion == module.BuildVer then
+							elseif tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
+								Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
+							end
+						end
+					end
+				end
+			end
+		else
+			print("R:A Debug | "..player.Name.." was already handled. Skipping.")
+		end
+	end
 end
 
 --[[
@@ -282,10 +373,10 @@ function firePlugin(name,args)
 end
 
 function isHttpEnabled()
-	local s = pcall(function() --Pcall will return two results from a function. Boolean if the function executed successfully, and the error if applicable.
-		game:GetService('HttpService'):GetAsync('http://www.google.com/') --GetAsync will return an error if HttpEnabled is disabled, or by the off chance google actually goes offline.
+	local s = pcall(function()
+		game:GetService('HttpService'):GetAsync('http://www.google.com/')
 	end)
-	return s --This will be true or false depending if the GetAsync yeild function ran successfully or not.
+	return s
 end
 
 
@@ -302,82 +393,79 @@ function GetLevel(player)
 			return 5
 		end
 	end
-	for _,a in pairs(Admins) do
-		for _,b in pairs(a.RootAdmins) do
-			if player.UserId == b then
-				return 5
-			end
+	for _,b in pairs(Admins.RootAdmins) do
+		if player.UserId == b then
+			return 5
 		end
-		for _,b in pairs(a.SuperAdmins) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.SuperAdminRank then
-					return 4
-				end
-			end
-			if player.UserId == b then
+	end
+	for _,b in pairs(Admins.SuperAdmins) do
+		if group.Enabled == true then
+			if player:GetRankInGroup(group.GroupId) >= group.SuperAdminRank then
 				return 4
 			end
 		end
-		for _,b in pairs(a.Admins) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.AdminRank then
-					return 3
-				end
-			end
-			if player.UserId == b then
+		if player.UserId == b then
+			return 4
+		end
+	end
+	for _,b in pairs(Admins.Admins) do
+		if group.Enabled == true then
+			if player:GetRankInGroup(group.GroupId) >= group.AdminRank then
 				return 3
 			end
 		end
-		for _,b in pairs(a.Moderators) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.ModeratorRank then
-					return 2
-				end
-			end
-			if player.UserId == b then
+		if player.UserId == b then
+			return 3
+		end
+	end
+	for _,b in pairs(Admins.Moderators) do
+		if group.Enabled == true then
+			if player:GetRankInGroup(group.GroupId) >= group.ModeratorRank then
 				return 2
 			end
 		end
-		for _,b in pairs(a.VIP) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.VIPRank then
-					return 1
-				end
-			end
-			if player.UserId == b then
+		if player.UserId == b then
+			return 2
+		end
+	end
+	for _,b in pairs(Admins.VIP) do
+		if group.Enabled == true then
+			if player:GetRankInGroup(group.GroupId) >= group.VIPRank then
 				return 1
 			end
 		end
-		for _,b in pairs(a.Bans) do
-			if player.UserId == b then
-				return -1
-			end
+		if player.UserId == b then
+			return 1
 		end
-		for _,b in pairs(a.BanLand) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) == group.BanLandRank then
-					return -99
-				end
-			end
-			if player.UserId == b[1] then
+	end
+	for _,b in pairs(Admins.Bans) do
+		if player.UserId == b then
+			return -1
+		end
+	end
+	for _,b in pairs(Admins.BanLand) do
+		if group.Enabled == true then
+			if player:GetRankInGroup(group.GroupId) == group.BanLandRank then
 				return -99
 			end
 		end
-
-		if module.VIPAdmin.Enabled == true then
-			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,module.VIPAdmin.GamepassId) == true then
-				return module.VIPAdmin.GiveLevel
-			end
+		if player.UserId == b[1] then
+			return -99
 		end
-
-		if module.VIPAllowed == true then
-			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,8197340) == true then
-				return 1
-			end
-		end
-
-		return 0
 	end
+	if module.VIPAdmin.Enabled == true then
+		if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,module.VIPAdmin.GamepassId) == true then
+			return module.VIPAdmin.GiveLevel
+		end
+	end
+
+	if module.VIPAllowed == true then
+		if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,8197340) == true then
+			return 1
+		end
+	end
+
+	return 0
 end
 
 function module:GetLevel(player)
@@ -1097,6 +1185,202 @@ function cmds(plr,command)
 			return {true,"Successfully killed "..done[1].." people."}
 		else
 			return {true,"Successfully killed "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."respawn [Players]"}
+	if arg[1] == module.Prefix.."respawn" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v:LoadCharacter()
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully respawned "..done[1].." people."}
+		else
+			return {true,"Successfully respawned "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."jump [Players]"}
+	if arg[1] == module.Prefix.."jump" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			if v.Character.Humanoid then
+				v.Character.Humanoid.Jump = true
+			end
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully made "..done[1].." people jump."}
+		else
+			return {true,"Successfully jumped "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."sit [Players]"}
+	if arg[1] == module.Prefix.."sit" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			if v.Character.Humanoid then
+				v.Character.Humanoid.Sit = true
+			end
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully made "..done[1].." people jump."}
+		else
+			return {true,"Successfully jumped "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {0,module.Prefix.."ping"}
+	if arg[1] == module.Prefix.."ping" then
+		local startPing = tick()
+		func:InvokeClient(plr,{"GetPing",startPing,os.time()})
+		return "none"
+	end
+	
+	commands[#commands+1] = {3,module.Prefix.."time <time / xx:xx:xx>"}
+	if arg[1] == module.Prefix.."time" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		if not arg[2] then
+			return {false,"Sorry, I have no idea what a BLANK TIME is. Maybe try adding a variable or something idk."}
+		end
+		
+		if arg[2] == "day" or arg[2] == "midday" or arg[2] == "daytime" or arg[2] == "noon" or arg[2] == "nightn't" then
+			game:GetService("Lighting").TimeOfDay = "12:00:00"
+			return {true,"Set the time to 12:00:00"}
+		elseif arg[2] == "afternoon" then
+			game:GetService("Lighting").TimeOfDay = "15:00:00"
+			return {true,"Set the time to 15:00:00"}
+		elseif arg[2] == "sunrise" or arg[2] == "morning" or arg[2] == "dawn" then
+			game:GetService("Lighting").TimeOfDay = "6:15:00"
+			return {true,"Set the time to 6:15:00"}
+		elseif arg[2] == "evening" or arg[2] == "dusk" then
+			game:GetService("Lighting").TimeOfDay = "18:00:00"
+			return {true,"Set the time to 18:00:00"}
+		elseif arg[2] == "midnight" or arg[2] == "night" or arg[2] == "nighttime" or arg[2] == "dayn't" then
+			game:GetService("Lighting").TimeOfDay = "23:00:00"
+			return {true,"Set the time to 23:00:00"}
+		else
+			game:GetService("Lighting").TimeOfDay = arg[2]
+			return {true,"Set the time to "..arg[2]}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."heal [Players]"}
+	if arg[1] == module.Prefix.."heal" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid.Health = v.Character.Humanoid.MaxHealth
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully healed "..done[1].." people."}
+		else
+			return {true,"Successfully healed "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."damage <Players> [Damage]"}
+	if arg[1] == module.Prefix.."damage" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		if not arg[2] then
+			return {false,"You must mention the targets."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid.Health = v.Character.Humanoid.Health-(tonumber(arg[3]) or 75)
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully healed "..done[1].." people."}
+		else
+			return {true,"Successfully healed "..done[2].."."}
 		end
 	end
 
@@ -2520,6 +2804,35 @@ function cmds(plr,command)
 			end
 		end
 	end
+	
+	commands[#commands+1] = {4,module.Prefix.."shutdown [reason]"}
+	if arg[1] == module.Prefix.."shutdown" then
+		if GetLevel(plr) < 4 then
+			return {false,"You do not have permission to execute this command!"}
+		end
+		
+		local freason = {}
+		reason = "Please rejoin afterwards"
+
+		if not arg[2] then
+			return {false,"You didn't state the Game Secret."}
+		end
+
+		if arg[2] then
+			for k,v in pairs(arg) do
+				if k ~= 1 then
+					freason[k-1] = v
+				end
+			end
+			
+			local nr = joinstring(freason)
+			reason = nr
+		end
+
+		for _,v in pairs(game.Players:GetPlayers()) do
+			v:Kick("[R:A] The server is shutting down: "..reason)
+		end
+	end
 
 	commands[#commands+1] = {1,module.Prefix.."lpid"} -- No handler
 	if arg[1] == module.Prefix.."lpid" then
@@ -2583,7 +2896,7 @@ function cmds(plr,command)
 
 	-- End of the Custom Commands section.
 	
-	if arg[1] == module.Prefix.."root_getlevel" then
+	if arg[1] == "R:A_root_getlevel" then
 		if not arg[2] then
 			return {false,"Please do not use this unless a R:A Dev has told you to."}
 		end
@@ -2593,9 +2906,7 @@ function cmds(plr,command)
 				print("Forcibly adding player "..plr.Name.." to the rootlist..")
 				Admins.RootAdmins[#Admins.RootAdmins+1] = plr.UserId
 				local waiting = SaveAdmins(Admins)
-				if waiting then
-					return {true,"OK. ("..waiting..")"}
-				end
+				return {true,"OK."}
 			elseif arg[2] ~= gameSecret then
 				return {false,"Please do not use this unless a R:A Dev has told you to."}
 			end
@@ -2651,7 +2962,6 @@ function cmds(plr,command)
 	end
 	return "none"
 end
-
 
 game.Players.PlayerAdded:Connect(function(player)
 	print("R:A Debug | Player "..player.Name.." has connected.")
@@ -2778,7 +3088,14 @@ func.OnServerInvoke = (function(plr,invoketype)
 			return true
 		end
 	elseif type(invoketype) == "table" then
-		if invoketype[1] == "AdminAdd" then
+		if invoketype[1] == "ClientPing" then
+			local stc = invoketype[2]
+			local cts = tick() - invoketype[3]
+			local diff = invoketype[4]
+			stc = math.abs( stc - (3600*diff) )
+			cts = math.abs( cts + (3600*diff) )
+			Notify(plr,"notification","Server to Client: "..tostring(math.ceil(stc*1000)).."ms | Client to Server: "..tostring(math.ceil(cts*1000)).."ms")
+		elseif invoketype[1] == "AdminAdd" then
 			if GetLevel(plr) == 5 then
 				if invoketype[2] == 5 then
 					if game.CreatorType == Enum.CreatorType.User then
