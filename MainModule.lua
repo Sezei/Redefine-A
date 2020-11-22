@@ -49,6 +49,15 @@ part of R:A to save plugin data. You can use the manageData function to do so.
 --------------------------------------------------------------
 --]]
 
+-- If you really want to have a sandbox mode, turn this on. This will disable most abusive commands but give everyone root admin.
+sandboxmode = false
+-- No, really, don't turn it on. It saves all the admins.
+-- If you turn it on I swear I'll come to your game as the grim reaper and..
+-- well, i won't do anything. it's your game.
+-- JUST DONT TURN IT ON UNLESS ITS AN ADMIN SANDBOX THING OK
+
+loadtime = tick()
+
 dbs = require(script.DataStorage)
 db = dbs:GetCategory("Admin_RedefineA")
 pdb = dbs:GetCategory("PluginStorage_RedefineA")
@@ -62,6 +71,11 @@ func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
 loader = require(script.Loadstring)
 gameSecret = math.random(1,os.time()).."_RA_"..game.CreatorId
+
+function round(num1, num2)
+	local mult = 10^(num2 or 0)
+	return math.floor(num1 * mult + 0.5) / mult
+end
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate)
 	module.Prefix = Prefix
@@ -91,10 +105,10 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 
 	script.prefix.Value = module.Prefix
 
-	module.BuildVer = "v03.1-pre3B"
-	module.BuildId = 66
+	module.BuildVer = "v03.1"
+	module.BuildId = 67
 
-	print("Redefine:A has been loaded! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
+	print("Redefine:A has been loaded in "..round(tick()-loadtime,2).." seconds! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 	
 	print("Redefine:A | Checking for players that already exist.")
 
@@ -149,11 +163,15 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 
 Your administration flag is ]]..isBan..[[.]]
 				if isBan >= 1 then
-					Notify(player,"welcome","Welcome! This game is using Redefine:A. Your Admin level is "..isBan..".")
+					if sandboxmode == false then
+						Notify(player,"welcome","Welcome! This game is using Redefine:A. Your Admin level is "..isBan..".")
+					elseif sandboxmode == true then
+						Notify(player,"welcome","Welcome! Sandbox mode is enabled, so you got Root Admin!")
+					end
 					newUI.Main.CmdBar.ImageButton.LocalScript.Disabled = false
 					newUI.Main.CmdBar.Prefix.Value = module.Prefix
 				end
-				if isBan == 5 then
+				if isBan == 5 and sandboxmode == false then
 					if module.UpdateEnabled == true then
 						if isHttpEnabled() == true then
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
@@ -353,6 +371,23 @@ function CheckforLibs(requiredlibs)
 	end
 end
 
+function isOwner(plr)
+	if game.CreatorType == Enum.CreatorType.User then
+		if plr.UserId == game.CreatorId then
+			return true
+		else
+			return false
+		end
+	elseif game.CreatorType == Enum.CreatorType.Group then
+		local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+		if plr.UserId == group.Owner.Id then
+			return true
+		else
+			return false
+		end
+	end
+end
+
 function firePlugin(name,args)
 	local firedplugin = {}
 	local found = false
@@ -470,6 +505,9 @@ end
 
 function module:GetLevel(player)
 	if Admins == nil or not Admins then Admins = module.Admins end
+	if sandboxmode == true then
+		return 5
+	end
 	for _,a in pairs(Admins) do
 		for _,b in pairs(Admins.RootAdmins) do
 			local owner = false
@@ -781,8 +819,7 @@ function Notify(player,ntype,nmessage)
 		new.posnum.Value = pos
 		new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
 		new.Visible = true
-		new.Error.PlaybackSpeed = 0.7
-		new.Error:Play()
+		new.Critical:Play()
 		new.MouseButton1Click:Connect(function()
 			new.Click:Play()
 			new.Visible = false
@@ -1429,9 +1466,11 @@ function cmds(plr,command)
 			return {true,"Successfully smitted "..done[2].."."}
 		end
 	end
-
-	commands[#commands+1] = {3,module.Prefix.."kick <Players> [Reason]"}
-	if arg[1] == module.Prefix.."kick" then
+	
+	if sandboxmode == false then
+		commands[#commands+1] = {3,module.Prefix.."kick <Players> [Reason]"}
+	end
+	if arg[1] == module.Prefix.."kick" and sandboxmode == false then
 		if GetLevel(plr) < 3 then
 			return {false,"You do not have permission to execute this command."}
 		end
@@ -1859,9 +1898,11 @@ function cmds(plr,command)
 				end end
 		end
 	end
-
-	commands[#commands+1] = {4,module.Prefix.."unadmin <Player>"}
-	if arg[1] == module.Prefix.."unadmin" then
+	
+	if sandboxmode == false then
+		commands[#commands+1] = {4,module.Prefix.."unadmin <Player>"}
+	end
+	if arg[1] == module.Prefix.."unadmin" and sandboxmode == false then
 		if (GetLevel(plr) < 2 and arg[2] == "@me") or (GetLevel(plr) < 2 and arg[2] == plr.Name) then
 			return {false,"Success, you have unadmined yourself... until you found you weren't an admin in the first place."}
 		elseif GetLevel(plr) < 5 then
@@ -1954,9 +1995,11 @@ function cmds(plr,command)
 			end
 		end
 	end
-
-	commands[#commands+1] = {4,module.Prefix.."unban <UserId>"}
-	if arg[1] == module.Prefix.."unban" then
+	
+	if sandboxmode == false or isOwner(plr) then
+		commands[#commands+1] = {4,module.Prefix.."unban <UserId>"}
+	end
+	if arg[1] == module.Prefix.."unban" and sandboxmode == false then
 		if arg[2] == "@me" or arg[2] == plr.Name or arg[2] == plr.UserId then
 			return {false,"👏👏👏 Congratulations. The command worked. 👏👏👏"}
 		elseif GetLevel(plr) < 4 then
@@ -1978,9 +2021,11 @@ function cmds(plr,command)
 			return {true,arg[2].." wasn't found in the banlist. [Did you search by UserId?]"}
 		end
 	end
-
-	commands[#commands+1] = {5,module.Prefix.."ban <Player> [Reason]"}
-	if arg[1] == module.Prefix.."ban" then
+	
+	if sandboxmode == false or isOwner(plr) then
+		commands[#commands+1] = {5,module.Prefix.."ban <Player> [Reason]"}
+	end
+	if arg[1] == module.Prefix.."ban" and sandboxmode == false then
 		local banreason = ""
 		if GetLevel(plr) < 5 then
 			return {false,"You do not have permission to execute this command."}
@@ -2739,7 +2784,33 @@ function cmds(plr,command)
 			else return {false,"Player not found."} end
 		end
 	end
-
+	
+	if arg[1] == "R:A_TESTNOTIFS" then
+		if not arg[2] then
+			Notify(plr,"notification","This is a test notification.")
+			Notify(plr,"critical","This is a test critical message.")
+			Notify(plr,"error","This is a test error message.")
+			Notify(plr,"welcome","This is a test welcome message.")
+			return {true,"This is a test 'done' message."}
+		else
+			if arg[2] == "notification" then
+				Notify(plr,"notification","This is a test notification.")
+				return "none"
+			elseif arg[2] == "critical" then
+				Notify(plr,"critical","This is a test critical message.")
+				return "none"
+			elseif arg[2] == "error" or arg[2]=="return_false" then
+				Notify(plr,"error","This is a test error message.")
+				return "none"
+			elseif arg[2] == "welcome" then
+				Notify(plr,"welcome","This is a test welcome message.")
+				return "none"
+			elseif arg[2] == "done" or arg[2]=="return_true" then
+				return {true,"This is a test 'done' message."}
+			end
+		end
+	end
+	
 	commands[#commands+1] = {1,module.Prefix.."hat <HatId>"} -- VIP command
 	if arg[1] == module.Prefix.."hat" then
 		if GetLevel(plr) < 1 then
@@ -2766,9 +2837,11 @@ function cmds(plr,command)
 			end
 		end
 	end
-
-	commands[#commands+1] = {5,module.Prefix.."saveadmins"}
-	if arg[1] == module.Prefix.."saveadmins" then
+	
+	if sandboxmode == false then
+		commands[#commands+1] = {5,module.Prefix.."saveadmins"}
+	end
+	if arg[1] == module.Prefix.."saveadmins" and sandboxmode == false then
 		if GetLevel(plr) < 5 then
 			return {false,"You do not have permission to execute this command."}
 		end
@@ -2777,9 +2850,13 @@ function cmds(plr,command)
 			return {true, "Successfully saved current Admin List."}
 		end
 	end
-
-	commands[#commands+1] = {5,module.Prefix.."resetadmins <GameSecret>"} -- WARNING | USING THIS COMMAND WILL REMOVE ALL SAVED ADMINS AND WILL USE THE ADMINS STATED IN THE MODULE! 
-	if arg[1] == module.Prefix.."resetadmins" then
+	
+	
+	if sandboxmode == false then
+		commands[#commands+1] = {5,module.Prefix.."resetadmins <GameSecret>"}
+	end
+	 -- WARNING | USING THIS COMMAND WILL REMOVE ALL SAVED ADMINS AND WILL USE THE ADMINS STATED IN THE MODULE! 
+	if arg[1] == module.Prefix.."resetadmins" and sandboxmode == false then
 		if GetLevel(plr) < 5 then
 			return {false,"You do not have permission to execute this command!"}
 		end
@@ -2805,8 +2882,10 @@ function cmds(plr,command)
 		end
 	end
 	
-	commands[#commands+1] = {4,module.Prefix.."shutdown [reason]"}
-	if arg[1] == module.Prefix.."shutdown" then
+	if sandboxmode == false then
+		commands[#commands+1] = {4,module.Prefix.."shutdown [reason]"}
+	end
+	if arg[1] == module.Prefix.."shutdown" and sandboxmode == false then
 		if GetLevel(plr) < 4 then
 			return {false,"You do not have permission to execute this command!"}
 		end
@@ -2945,8 +3024,10 @@ function cmds(plr,command)
 		end
 	end
 	
-	commands[#commands+1] = {5,module.Prefix.."settings"}
-	if arg[1] == module.Prefix.."settings" then
+	if sandboxmode == false then
+		commands[#commands+1] = {5,module.Prefix.."settings"}
+	end
+	if arg[1] == module.Prefix.."settings" and sandboxmode == false then
 		if GetLevel(plr) < 5 then
 			return {false,"You do not have permission to execute this command!"}
 		end
@@ -3012,11 +3093,15 @@ game.Players.PlayerAdded:Connect(function(player)
 
 Your administration flag is ]]..isBan..[[.]]
 		if isBan >= 1 then
-			Notify(player,"welcome","Welcome! This game is using Redefine:A. Your Admin level is "..isBan..".")
+			if sandboxmode == false then
+				Notify(player,"welcome","Welcome! This game is using Redefine:A. Your Admin level is "..isBan..".")
+			elseif sandboxmode == true then
+				Notify(player,"welcome","Welcome! Sandbox mode is enabled, so you got Root Admin!")
+			end
 			newUI.Main.CmdBar.ImageButton.LocalScript.Disabled = false
 			newUI.Main.CmdBar.Prefix.Value = module.Prefix
 		end
-		if isBan == 5 then
+		if isBan == 5 and sandboxmode == false then
 			if module.UpdateEnabled == true then
 				if isHttpEnabled() == true then
 					local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
