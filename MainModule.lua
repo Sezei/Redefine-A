@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};--[[	OH NO																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																					Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -10,8 +10,6 @@
 
 --------------------------------------------------------------
 
-This is a community update by both EngiAdurite and Cytronyx.
-Thank you very much for the help, Cytronyx!
 You can help too by making pull requests in the official Github;
 greasemonkey123/Redefine-A
 
@@ -51,10 +49,6 @@ part of R:A to save plugin data. You can use the manageData function to do so.
 
 -- If you really want to have a sandbox mode, turn this on. This will disable most abusive commands but give everyone root admin.
 sandboxmode = false
--- No, really, don't turn it on. It saves all the admins.
--- If you turn it on I swear I'll come to your game as the grim reaper and..
--- well, i won't do anything. it's your game.
--- JUST DONT TURN IT ON UNLESS ITS AN ADMIN SANDBOX THING OK
 
 loadtime = tick()
 
@@ -71,11 +65,16 @@ func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
 loader = require(script.Loadstring)
 gameSecret = math.random(1,os.time()).."_RA_"..game.CreatorId
+serverlock = false
 
 function round(num1, num2)
 	local mult = 10^(num2 or 0)
 	return math.floor(num1 * mult + 0.5) / mult
 end
+
+-- Build 68: Relocated build info
+module.BuildVer = "v03.2Pre1"
+module.BuildId = 68
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate)
 	module.Prefix = Prefix
@@ -102,11 +101,10 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 		Save:wait()
 		Admins = module.Admins
 	end
-
+	
+	-- Build 68: Relocated build info
+	
 	script.prefix.Value = module.Prefix
-
-	module.BuildVer = "v03.1"
-	module.BuildId = 67
 
 	print("Redefine:A has been loaded in "..round(tick()-loadtime,2).." seconds! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 	
@@ -170,6 +168,16 @@ Your administration flag is ]]..isBan..[[.]]
 					end
 					newUI.Main.CmdBar.ImageButton.LocalScript.Disabled = false
 					newUI.Main.CmdBar.Prefix.Value = module.Prefix
+				end
+				if serverlock == true and isBan <= 1 then
+					player:Kick("[R:A] The server is currently locked. Please try again later or join a new server.")
+					for _,v in pairs(game.Players:GetPlayers()) do
+						if GetLevel(v) >= 2 then
+							Notify(v,"error",player.Name.." has attempted to join but the server is locked.")
+						end
+					end
+				elseif serverlock == true and isBan >= 2 then
+					Notify(player,"notification","The server is currently locked, but your admin level has bypassed the lock.")
 				end
 				if isBan == 5 and sandboxmode == false then
 					if module.UpdateEnabled == true then
@@ -346,6 +354,51 @@ function loadPlugin(name)
 		CustomCommands[#CustomCommands+1] = loadedplug
 	elseif loadedplug.pType == "Addon" then
 		Extras[#Extras+1] = loadedplug
+	end
+end
+
+function toR6(plr)
+	local newRig = script.PlayerModels.r6:Clone()
+	local newHumanoid = newRig.Humanoid
+	local originalCFrame = plr.Character.Head.CFrame
+	newRig.Name = plr.Name
+	for a,b in pairs(plr.Character:GetChildren()) do
+		if b:IsA("Accessory") or b:IsA("Pants") or b:IsA("Shirt") or b:IsA("ShirtGraphic") or b:IsA("BodyColors") then
+			b.Parent = newRig
+		elseif b.Name == "Head" and b:FindFirstChild("face") then
+			newRig.Head.face.Texture = b.face.Texture
+		end
+	end
+	plr.Character = newRig
+	newRig.Parent = workspace
+	newRig.Head.CFrame = originalCFrame
+end
+
+function toR15(plr)
+	local newRig = script.PlayerModels.r15:Clone()
+	local newHumanoid = newRig.Humanoid
+	local originalCFrame = plr.Character.Head.CFrame
+	newRig.Name = plr.Name
+	for a,b in pairs(plr.Character:GetChildren()) do
+		if b:IsA("Accessory") or b:IsA("Pants") or b:IsA("Shirt") or b:IsA("ShirtGraphic") or b:IsA("BodyColors") then
+			b.Parent = newRig
+		elseif b.Name == "Head" and b:FindFirstChild("face") then
+			newRig.Head.face.Texture = b.face.Texture
+		end
+	end
+	plr.Character = newRig
+	newRig.Parent = workspace
+	newRig.Head.CFrame = originalCFrame
+end
+
+function Scale(humanoid,sizemultiplier) -- Make sure to check if the player is R15 BEFORE executing this function.
+	if humanoid then
+		humanoid.BodyDepthScale.Value = humanoid.BodyDepthScale.Value * sizemultiplier
+		humanoid.BodyHeightScale.Value = humanoid.BodyHeightScale.Value * sizemultiplier
+		humanoid.BodyWidthScale.Value = humanoid.BodyWidthScale.Value * sizemultiplier
+		humanoid.HeadScale.Value = humanoid.HeadScale.Value * sizemultiplier
+	else
+		return
 	end
 end
 
@@ -1255,6 +1308,112 @@ function cmds(plr,command)
 		end
 	end
 	
+	commands[#commands+1] = {3,module.Prefix.."resize [Players] [Scale]"}
+	if arg[1] == module.Prefix.."resize" or arg[1] == module.Prefix.."scale" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		if not arg[2] then
+			return {false,"You must provide a target."}
+		end
+		if not arg[3] then
+			return {false,"You must provide a scale."}
+		end
+		
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			if v.Character.Humanoid then
+				if v.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+					Scale(v.Character.Humanoid,tonumber(arg[3]))
+				elseif v.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then
+					return {false,"This command does not support R6 yet."}
+				end
+			end
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully resized "..done[1].." people."}
+		else
+			return {true,"Successfully resized "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {3,module.Prefix.."tor6 [Players]"} -- Alias: !R6
+	if arg[1] == module.Prefix.."tor6" or arg[1] == module.Prefix.."r6" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			if v.Character.Humanoid then
+				toR6(v)
+			end
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully turned "..done[1].." people into R6."}
+		else
+			return {true,"Successfully turned "..done[2].." into R6."}
+		end
+	end
+	
+	commands[#commands+1] = {3,module.Prefix.."tor15 [Players]"} -- Alias: !R15
+	if arg[1] == module.Prefix.."tor15" or arg[1] == module.Prefix.."r15" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			if v.Character.Humanoid then
+				toR15(v)
+			end
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully turned "..done[1].." people into R15."}
+		else
+			return {true,"Successfully turned "..done[2].." into R15."}
+		end
+	end
+	
 	commands[#commands+1] = {2,module.Prefix.."jump [Players]"}
 	if arg[1] == module.Prefix.."jump" then
 		if GetLevel(plr) < 2 then
@@ -1415,9 +1574,9 @@ function cmds(plr,command)
 			end
 		end
 		if done[1] >= 5 then
-			return {true,"Successfully healed "..done[1].." people."}
+			return {true,"Successfully damaged "..done[1].." people."}
 		else
-			return {true,"Successfully healed "..done[2].."."}
+			return {true,"Successfully damaged "..done[2].."."}
 		end
 	end
 
@@ -1660,6 +1819,26 @@ function cmds(plr,command)
 				end
 			end
 		end
+	end
+	
+	if sandboxmode == false then
+		commands[#commands+1] = {4,module.Prefix.."slock"}
+		commands[#commands+1] = {4,module.Prefix.."unslock"}
+		commands[#commands+1] = {4,module.Prefix.."toggleslock"}
+	end
+	if ((arg[1] == module.Prefix.."slock") or (arg[1] == module.Prefix.."toggleslock" and serverlock == false)) and sandboxmode == false then
+		if GetLevel(plr) < 4 then
+			return {false,"You do not have permission to lock the server."}
+		end
+		serverlock = true
+		return {true,"The server has been locked."}
+	end
+	if ((arg[1] == module.Prefix.."unslock") or (arg[1] == module.Prefix.."toggleslock" and serverlock == true)) and sandboxmode == false then
+		if GetLevel(plr) < 4 then
+			return {false,"You do not have permission to lock the server."}
+		end
+		serverlock = false
+		return {true,"The server has been unlocked."}
 	end
 
 	commands[#commands+1] = {4,module.Prefix.."mod <Player>"}
@@ -3100,6 +3279,16 @@ Your administration flag is ]]..isBan..[[.]]
 			end
 			newUI.Main.CmdBar.ImageButton.LocalScript.Disabled = false
 			newUI.Main.CmdBar.Prefix.Value = module.Prefix
+		end
+		if serverlock == true and isBan <= 1 then
+			player:Kick("[R:A] The server is currently locked. Please try again later or join a new server.")
+			for _,v in pairs(game.Players:GetPlayers()) do
+				if GetLevel(v) >= 2 then
+					Notify(v,"error",player.Name.." has attempted to join but the server is locked.")
+				end
+			end
+		elseif serverlock == true and isBan >= 2 then
+			Notify(player,"notification","The server is currently locked, but your admin level has bypassed the lock.")
 		end
 		if isBan == 5 and sandboxmode == false then
 			if module.UpdateEnabled == true then
