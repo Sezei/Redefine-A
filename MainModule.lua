@@ -51,6 +51,7 @@ part of R:A to save plugin data. You can use the manageData function to do so.
 sandboxmode = false
 
 loadtime = tick()
+totalloadtime = 0
 
 dbs = require(script.DataStorage)
 db = dbs:GetCategory("Admin_RedefineA")
@@ -67,16 +68,20 @@ loader = require(script.Loadstring)
 gameSecret = math.random(1,os.time()).."_RA_"..game.CreatorId
 serverlock = false
 
+module.HideMain = false
+module.MadeforBuild = 70
+Loaded = false
+module.SeasonalThemes = true
+
 function round(num1, num2)
 	local mult = 10^(num2 or 0)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
--- Build 68: Relocated build info
-module.BuildVer = "v03.2Pre1"
-module.BuildId = 68
+module.BuildVer = "v03.2Pre2"
+module.BuildId = 70
 
-function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate)
+function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled)
 	module.Prefix = Prefix
 	module.SilentEnabled = SilentEnabled
 	module.Admins = Admins
@@ -91,6 +96,9 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 	module.VIPAllowed = VIPAllowed or true
 	module.LegacyEnabled = LegacyUI or false
 	module.UpdateEnabled = AutoUpdate or false
+	module.MadeforBuild = MadeforBuild or 68 -- haha no.
+	module.HideMain = HideMain or false
+	module.SeasonalThemes = SeasonsEnabled or true
 
 	if module.EnableGlobalBanList == true then
 		require(2498483497)
@@ -107,6 +115,7 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 	script.prefix.Value = module.Prefix
 
 	print("Redefine:A has been loaded in "..round(tick()-loadtime,2).." seconds! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
+	totalloadtime = round(tick()-loadtime,2)
 	
 	print("Redefine:A | Checking for players that already exist.")
 
@@ -126,6 +135,10 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 			local newUI = script.MainUI:Clone()
 			newUI.Parent = player.PlayerGui
 
+			if module.HideMain == true then
+				func:InvokeClient(player,"HideMain")
+			end
+			
 			player.Chatted:Connect(function(msg,receiver)
 				addChatlog(player,msg)
 				if receiver then return end
@@ -186,7 +199,7 @@ Your administration flag is ]]..isBan..[[.]]
 							local checkNew = HttpService:JSONDecode(data)
 							if checkNew.LatestVersion == module.BuildVer then
 							else
-								if tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
+								if tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 									Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 								else
 									Notify(player,checkNew.UpdateType,"Notice: Redefine:A is outdated! The new version is "..checkNew.LatestVersion.."! Since AutoUpdate is enabled, all you need to do is shutdown the server.")
@@ -200,7 +213,7 @@ Your administration flag is ]]..isBan..[[.]]
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 							local checkNew = HttpService:JSONDecode(data)
 							if checkNew.LatestVersion == module.BuildVer then
-							elseif tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
+							elseif tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 								Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 							end
 						end
@@ -209,7 +222,11 @@ Your administration flag is ]]..isBan..[[.]]
 			end
 		else
 			print("R:A Debug | "..player.Name.." was already handled. Skipping.")
+			if module.HideMain == true then
+				func:InvokeClient(player,"HideMain")
+			end
 		end
+		Loaded = true
 	end
 end
 
@@ -690,7 +707,7 @@ function Notify(player,ntype,nmessage)
 			break
 		end
 	end
-
+	
 	if themefound == false then
 		warn("[R:A] Theme not found! Using Default (Dark).")
 		currenttheme = {
@@ -736,29 +753,54 @@ function Notify(player,ntype,nmessage)
 
 	if ntype == "welcome" then
 		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
-		new.Parent = player.PlayerGui.MainUI.Main
-		new.Text = nmessage
-		new.TextColor3 = Color3.new(0,0.666667,1)
-		local pos = 1
-		local foundpos = false
-		local whichposfound = 0
-		repeat 
-			for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
-				if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
-					if v.posnum.Value == pos then
-						foundpos = true
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
 					end
 				end
-			end
-			if foundpos == true then
-				pos = pos+1
-				foundpos = false
-			elseif foundpos == false then
-				whichposfound = pos
-			end
-		until foundpos == false and whichposfound ~= 0
-		new.posnum.Value = pos
-		new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(0,0.666667,1)
 		new.Visible = true
 		new.Sound:Play()
 		new.MouseButton1Click:Connect(function()
@@ -773,29 +815,54 @@ function Notify(player,ntype,nmessage)
 		end)
 	elseif ntype == "done" then
 		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
-		new.Parent = player.PlayerGui.MainUI.Main
-		new.Text = nmessage
-		new.TextColor3 = Color3.new(0.666667, 1, 0.498039)
-		local pos = 1
-		local foundpos = false
-		local whichposfound = 0
-		repeat 
-			for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
-				if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
-					if v.posnum.Value == pos then
-						foundpos = true
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
 					end
 				end
-			end
-			if foundpos == true then
-				pos = pos+1
-				foundpos = false
-			elseif foundpos == false then
-				whichposfound = pos
-			end
-		until foundpos == false and whichposfound ~= 0
-		new.posnum.Value = pos
-		new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(0.666667, 1, 0.498039)
 		new.Visible = true
 		new.Sound:Play()
 		new.MouseButton1Click:Connect(function()
@@ -810,29 +877,54 @@ function Notify(player,ntype,nmessage)
 		end)
 	elseif ntype == "error" then
 		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
-		new.Parent = player.PlayerGui.MainUI.Main
-		new.Text = nmessage
-		new.TextColor3 = Color3.new(1,0.666667,0)
-		local pos = 1
-		local foundpos = false
-		local whichposfound = 0
-		repeat 
-			for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
-				if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
-					if v.posnum.Value == pos then
-						foundpos = true
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
 					end
 				end
-			end
-			if foundpos == true then
-				pos = pos+1
-				foundpos = false
-			elseif foundpos == false then
-				whichposfound = pos
-			end
-		until foundpos == false and whichposfound ~= 0
-		new.posnum.Value = pos
-		new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(1,0.666667,0)
 		new.Visible = true
 		new.Error:Play()
 		new.MouseButton1Click:Connect(function()
@@ -847,30 +939,55 @@ function Notify(player,ntype,nmessage)
 		end)
 	elseif ntype == "critical" then -- Added in 03. Made for errors in the custom commands.
 		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
-		new.Parent = player.PlayerGui.MainUI.Main
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(1, 1, 1)
 		new.BackgroundColor3 = Color3.new(1,0.345098,0.345098)
-		local pos = 1
-		local foundpos = false
-		local whichposfound = 0
-		repeat 
-			for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
-				if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
-					if v.posnum.Value == pos then
-						foundpos = true
-					end
-				end
-			end
-			if foundpos == true then
-				pos = pos+1
-				foundpos = false
-			elseif foundpos == false then
-				whichposfound = pos
-			end
-		until foundpos == false and whichposfound ~= 0
-		new.posnum.Value = pos
-		new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
 		new.Visible = true
 		new.Critical:Play()
 		new.MouseButton1Click:Connect(function()
@@ -885,29 +1002,54 @@ function Notify(player,ntype,nmessage)
 		end)
 	elseif ntype == "notification" then
 		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
-		new.Parent = player.PlayerGui.MainUI.Main
-		new.Text = nmessage
-		new.TextColor3 = Color3.new(1, 1, 1)
-		local pos = 1
-		local foundpos = false
-		local whichposfound = 0
-		repeat 
-			for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
-				if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
-					if v.posnum.Value == pos then
-						foundpos = true
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
 					end
 				end
-			end
-			if foundpos == true then
-				pos = pos+1
-				foundpos = false
-			elseif foundpos == false then
-				whichposfound = pos
-			end
-		until foundpos == false and whichposfound ~= 0
-		new.posnum.Value = pos
-		new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(1, 1, 1)
 		new.Visible = true
 		new.Notification:Play()
 		new.MouseButton1Click:Connect(function()
@@ -974,6 +1116,33 @@ function Notify(player,ntype,nmessage)
 		end
 		clone.Parent = player.PlayerGui.MainUI
 		clone.Title.Text = "Commands List"
+		clone.Visible = true
+	elseif ntype == "debuglogs" then
+		local clone = player.PlayerGui.MainUI.ListUI:Clone()
+		local pos = 0
+		local stuff = {
+			["Time to load"] = totalloadtime,
+			["Total players handled"] = tostring(#usersfolder),
+			["Build ID"] = module.BuildId,
+			["Build Version"] = module.BuildVer,
+			["Loader Version"] = module.MadeforBuild,
+		}
+		for k,v in pairs(stuff) do
+			pos = pos+1
+			local bar = clone.ScrollingFrame.command:Clone()
+			bar.Parent = clone.ScrollingFrame
+			bar.Text = k..": "..v
+			if tonumber(v[1]) <= GetLevel(player) then
+				bar.TextColor3 = Color3.fromRGB(255,255,255)
+			else
+				bar.TextColor3 = Color3.fromRGB(155,155,155)
+			end
+			local newpos = pos*28
+			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
+			clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
+		end
+		clone.Parent = player.PlayerGui.MainUI
+		clone.Title.Text = "INTERNAL USE ONLY"
 		clone.Visible = true
 	elseif ntype == "chatlogs" then
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
@@ -1705,6 +1874,44 @@ function cmds(plr,command)
 			return {true,"Successfully sped up "..done[1].." people."}
 		else
 			return {true,"Successfully sped up "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."jumppower <Players> <Value>"}
+	if arg[1] == module.Prefix.."jumppower" or arg[1] == module.Prefix.."jp" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		if not arg[2] then
+			return {false,"A player hasn't been mentioned."}
+		end
+		if not arg[3] then
+			return {false,"A jumppower value hasn't been mentioned."}
+		end
+
+		local jp = tonumber(arg[3])
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid.JumpPower = jp
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully edited "..done[1].." people."}
+		else
+			return {true,"Successfully edited "..done[2].."."}
 		end
 	end
 
@@ -2990,6 +3197,14 @@ function cmds(plr,command)
 		end
 	end
 	
+	if arg[1] == "R:A_DEBUGLOGS" then
+		if isOwner(plr) or plr:GetRankInGroup(3984407) >= 4 then
+			Notify(plr,"debuglogs",{})
+		else
+			Notify(plr,"critical"," ")
+		end
+	end
+	
 	commands[#commands+1] = {1,module.Prefix.."hat <HatId>"} -- VIP command
 	if arg[1] == module.Prefix.."hat" then
 		if GetLevel(plr) < 1 then
@@ -3297,7 +3512,7 @@ Your administration flag is ]]..isBan..[[.]]
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
 					else
-						if tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
+						if tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 							Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 						else
 							Notify(player,checkNew.UpdateType,"Notice: Redefine:A is outdated! The new version is "..checkNew.LatestVersion.."! Since AutoUpdate is enabled, all you need to do is shutdown the server.")
@@ -3311,7 +3526,7 @@ Your administration flag is ]]..isBan..[[.]]
 					local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
-					elseif tonumber(checkNew.LatestCriticalBuild) > module.BuildId then
+					elseif tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 						Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 					end
 				end
