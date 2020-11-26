@@ -1,6 +1,6 @@
 {
-	"LatestVersion": "v03.2Pre1",
-	"BuildId": "68",
-	"UpdateType": "notification",
-	"LatestCriticalBuild": "58"
+	"LatestVersion": "v03.2Pre2",
+	"BuildId": "70",
+	"UpdateType": "critical",
+	"LatestCriticalBuild": "70"
 }
