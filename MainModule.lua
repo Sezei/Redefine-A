@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 144--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 145--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -78,8 +78,8 @@ function round(num1, num2)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
-module.BuildVer = "v03.2Pre2A"
-module.BuildId = 71
+module.BuildVer = "v03.2Pre3"
+module.BuildId = 72
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled)
 	module.Prefix = Prefix
@@ -1480,6 +1480,38 @@ function cmds(plr,command)
 			return {true,"Successfully respawned "..done[1].." people."}
 		else
 			return {true,"Successfully respawned "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {3,module.Prefix.."explode [Players]"}
+	if arg[1] == module.Prefix.."explode" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			local exp = Instance.new('Explosion')
+			exp.Parent = v.Character:FindFirstChild("Head")
+			exp.Visible = true
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully exploded "..done[1].." people."}
+		else
+			return {true,"Successfully exploded "..done[2].."."}
 		end
 	end
 	
