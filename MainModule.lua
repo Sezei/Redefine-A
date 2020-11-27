@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 143--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -78,8 +78,8 @@ function round(num1, num2)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
-module.BuildVer = "v03.2Pre2"
-module.BuildId = 70
+module.BuildVer = "v03.2Pre2A"
+module.BuildId = 71
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled)
 	module.Prefix = Prefix
@@ -1122,21 +1122,18 @@ function Notify(player,ntype,nmessage)
 		local pos = 0
 		local stuff = {
 			["Time to load"] = totalloadtime,
-			["Total players handled"] = tostring(#usersfolder),
+			["Total players handled"] = tostring(#usersfolder:GetChildren()),
 			["Build ID"] = module.BuildId,
 			["Build Version"] = module.BuildVer,
 			["Loader Version"] = module.MadeforBuild,
+			["Internal Build ID"] = internalbuildid,
 		}
 		for k,v in pairs(stuff) do
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
 			bar.Parent = clone.ScrollingFrame
 			bar.Text = k..": "..v
-			if tonumber(v[1]) <= GetLevel(player) then
-				bar.TextColor3 = Color3.fromRGB(255,255,255)
-			else
-				bar.TextColor3 = Color3.fromRGB(155,155,155)
-			end
+			bar.TextColor3 = Color3.fromRGB(255,255,255)
 			local newpos = pos*28
 			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
 			clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
@@ -1258,15 +1255,15 @@ function module:GetPrefix()
 	return module.Prefix
 end
 
-function module:HandlePlayers(p, plrs, level)
-	if plrs == "" or plrs == " " then
+function module:HandlePlayers(p, plrs, level, ismessg)
+	if plrs == "" or plrs == " " or plrs == nil then
 		return Player(p)
 	end
 
 	local newplrs = splitstring(plrs,",")
 	local players = {}
 	local executor = p
-	local ismsg = false
+	local ismsg = ismessg or false
 
 	if GetLevel(Player(executor)) == 5 then
 		level = 0 -- If the executor is Root, then ignore level.
@@ -1280,6 +1277,15 @@ function module:HandlePlayers(p, plrs, level)
 	for _,v in pairs(newplrs) do
 		if v == "@me" then
 			players[#players+1] = Player(executor)
+		--[[elseif v == "@server" or v=="@@" or v=="#0" then
+			if GetLevel(executor) ~= 5 then
+				return {false,"You cannot target the server. ("..v..")"}
+			end
+			if not ismsg then
+				return {false,"You cannot target the server for non-sudo purposes. ("..v..")"}
+			elseif ismsg == true then
+				
+			end]]
 		elseif v == "@others" and level < 2 then
 			for _,k in pairs(game.Players:GetPlayers()) do
 				if k.Name ~= executor then
@@ -1423,7 +1429,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1453,7 +1459,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1489,7 +1495,7 @@ function cmds(plr,command)
 			return {false,"You must provide a scale."}
 		end
 		
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1525,7 +1531,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1557,7 +1563,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1589,7 +1595,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1621,7 +1627,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1691,7 +1697,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1715,6 +1721,99 @@ function cmds(plr,command)
 		end
 	end
 	
+	commands[#commands+1] = {2,module.Prefix.."god [Players]"}
+	if arg[1] == module.Prefix.."god" or arg[1] == module.Prefix.."godmode" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid.MaxHealth = math.huge
+			v.Character.Humanoid.Health = v.Character.Humanoid.MaxHealth
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully made "..done[1].." people gods."}
+		else
+			return {true,"Successfully made "..done[2].." a god."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."ungod [Players]"}
+	if arg[1] == module.Prefix.."ungod" or arg[1] == module.Prefix.."ungodmode" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid.MaxHealth = 100
+			v.Character.Humanoid.Health = v.Character.Humanoid.MaxHealth
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully made "..done[1].." people mortals."}
+		else
+			return {true,"Successfully made "..done[2].." a mortal."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."health [Players] [Amount]"}
+	if arg[1] == module.Prefix.."ungod" or arg[1] == module.Prefix.."ungodmode" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid.MaxHealth = tonumber(arg[3] or 100)
+			v.Character.Humanoid.Health = v.Character.Humanoid.MaxHealth
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully edited "..done[1].." people."}
+		else
+			return {true,"Successfully edited "..done[2].."."}
+		end
+	end
+	
 	commands[#commands+1] = {2,module.Prefix.."damage <Players> [Damage]"}
 	if arg[1] == module.Prefix.."damage" then
 		if GetLevel(plr) < 2 then
@@ -1725,7 +1824,7 @@ function cmds(plr,command)
 			return {false,"You must mention the targets."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1755,7 +1854,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1815,7 +1914,7 @@ function cmds(plr,command)
 			end
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1853,7 +1952,7 @@ function cmds(plr,command)
 
 		local speed = tonumber(arg[3])
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1891,7 +1990,7 @@ function cmds(plr,command)
 
 		local jp = tonumber(arg[3])
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1921,7 +2020,7 @@ function cmds(plr,command)
 			return {false,"You do not have permission to execute this command."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -1945,6 +2044,39 @@ function cmds(plr,command)
 			return {true,"Successfully gave F3X to "..done[1].." people."}
 		else
 			return {true,"Successfully gave "..done[2].." F3X."}
+		end
+	end
+	
+	commands[#commands+1] = {3,module.Prefix.."sword [Player]"}
+	if arg[1] == module.Prefix.."sword" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			-- code here
+			local btools = script.ClassicSword:Clone()
+			btools.Parent = v.Backpack
+			-- code end
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully gave a sword to "..done[1].." people."}
+		else
+			return {true,"Successfully gave "..done[2].." a sword."}
 		end
 	end
 
@@ -2286,6 +2418,13 @@ function cmds(plr,command)
 	end
 	
 	if sandboxmode == false then
+		commands[#commands+1] = {5,module.Prefix.."sudo <Player|@@> <Command>"}
+	end
+	if arg[1] == module.Prefix.."sudo" then
+		return {false,"This command is not yet available. Wait for.. another time."}
+	end
+	
+	if sandboxmode == false then
 		commands[#commands+1] = {4,module.Prefix.."unadmin <Player>"}
 	end
 	if arg[1] == module.Prefix.."unadmin" and sandboxmode == false then
@@ -2493,7 +2632,7 @@ function cmds(plr,command)
 				return {false,"You already have the necessary skill to fly! (Perhaps press X to fly again.)"}
 			end
 		end
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -2541,7 +2680,7 @@ function cmds(plr,command)
 			end
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],-1,true)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -2585,7 +2724,7 @@ function cmds(plr,command)
 			end
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],-1,true)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -2629,7 +2768,7 @@ function cmds(plr,command)
 			end
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],-1)
+		local targets = module:HandlePlayers(plr.Name,arg[2],-1,true)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
@@ -2652,8 +2791,52 @@ function cmds(plr,command)
 			return {true,"Successfully notified "..done[2].."."}
 		end
 	end
+	
+	commands[#commands+1] = {3,module.Prefix.."sm <Player> <Value>"}	
+	if arg[1] == module.Prefix.."sm" or arg[1] == module.Prefix.."servermessage" or arg[1] == module.Prefix.."am" or arg[1] == module.Prefix.."anonymousmessage" then
+		local buildreason = ""
 
-	commands[#commands+1] = {3,module.Prefix.."b / broadcast <Value>"} -- no handle
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		if not arg[2] then
+			return {false,"You didn't include anyone to message. If you want to message everyone, use "..module.Prefix.."broadcast."}
+		end
+
+		if arg[3] then
+			buildreason = ""
+			for _,v in pairs(arg) do
+				if v ~= arg[1] and v ~= arg[2] then
+					buildreason = buildreason.." "..v
+				end
+			end
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],-1,true)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			Notify(v,"newmsg",{"Message by Server",buildreason or "?"})
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully notified "..done[1].." people."}
+		else
+			return {true,"Successfully notified "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {3,module.Prefix.."b / broadcast <Value>"}
 	if arg[1] == module.Prefix.."b" or arg[1] == module.Prefix.."broadcast" then
 		if GetLevel(plr) < 3 then
 			return {false,"You do not have permission to execute this command."}
@@ -2671,6 +2854,29 @@ function cmds(plr,command)
 		for _,v in pairs(game.Players:GetPlayers()) do
 			local new = script.FullScreenNotification:Clone()
 			Notify(v,"newmsg",{"Message by "..plr.Name,buildreason or "?"})
+		end
+
+		return{true,"Success."}
+	end
+	
+	commands[#commands+1] = {4,module.Prefix.."sb <Value>"}
+	if arg[1] == module.Prefix.."sb" or arg[1] == module.Prefix.."serverbroadcast" or arg[1] == module.Prefix.."ab" or arg[1] == module.Prefix.."anonymousbroadcast" then
+		if GetLevel(plr) < 4 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		if arg[2] then
+			buildreason = ""
+			for _,v in pairs(arg) do
+				if v ~= arg[1] then
+					buildreason = buildreason.." "..v
+				end
+			end
+		end
+
+		for _,v in pairs(game.Players:GetPlayers()) do
+			local new = script.FullScreenNotification:Clone()
+			Notify(v,"newmsg",{"Server Message",buildreason or "?"})
 		end
 
 		return{true,"Success."}
@@ -3069,7 +3275,7 @@ function cmds(plr,command)
 			return {false,"You must include someone you want to bring."}
 		end
 
-		local targets = module:HandlePlayers(plr.Name,arg[2],2)
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
 		elseif targets[1] == false then
