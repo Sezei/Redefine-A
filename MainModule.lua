@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 143--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 145--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -78,8 +78,8 @@ function round(num1, num2)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
-module.BuildVer = "v03.2Pre2A"
-module.BuildId = 71
+module.BuildVer = "v03.2Pre3"
+module.BuildId = 72
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled)
 	module.Prefix = Prefix
@@ -1483,6 +1483,38 @@ function cmds(plr,command)
 		end
 	end
 	
+	commands[#commands+1] = {3,module.Prefix.."explode [Players]"}
+	if arg[1] == module.Prefix.."explode" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			local exp = Instance.new('Explosion')
+			exp.Parent = v.Character:FindFirstChild("Head")
+			exp.Visible = true
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully exploded "..done[1].." people."}
+		else
+			return {true,"Successfully exploded "..done[2].."."}
+		end
+	end
+	
 	commands[#commands+1] = {3,module.Prefix.."resize [Players] [Scale]"}
 	if arg[1] == module.Prefix.."resize" or arg[1] == module.Prefix.."scale" then
 		if GetLevel(plr) < 3 then
@@ -1783,6 +1815,71 @@ function cmds(plr,command)
 		end
 	end
 	
+	commands[#commands+1] = {2,module.Prefix.."ff [Players]"}
+	if arg[1] == module.Prefix.."ff" or arg[1] == module.Prefix.."forcefield" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		local targets = module:HandlePlayers(plr.Name,arg[2],1,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			local ff = Instance.new("ForceField")
+			ff.Parent = v.Character
+			ff.Visible = true
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully added a forcefield to "..done[1].." people."}
+		else
+			return {true,"Successfully added "..done[2].." a forcefield."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."unff [Players]"}
+	if arg[1] == module.Prefix.."unff" or arg[1] == module.Prefix.."unforcefield" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],1,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			local ff = v.Character:FindFirstChildOfClass("ForceField")
+			if ff then
+				ff:Destroy()
+			end
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully added a forcefield to "..done[1].." people."}
+		else
+			return {true,"Successfully added "..done[2].." a forcefield."}
+		end
+	end
+	
 	commands[#commands+1] = {2,module.Prefix.."health [Players] [Amount]"}
 	if arg[1] == module.Prefix.."ungod" or arg[1] == module.Prefix.."ungodmode" then
 		if GetLevel(plr) < 2 then
@@ -1814,8 +1911,8 @@ function cmds(plr,command)
 		end
 	end
 	
-	commands[#commands+1] = {2,module.Prefix.."damage <Players> [Damage]"}
-	if arg[1] == module.Prefix.."damage" then
+	commands[#commands+1] = {2,module.Prefix.."directdamage <Players> [Damage]"}
+	if arg[1] == module.Prefix.."directdamage" then
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
@@ -1833,6 +1930,40 @@ function cmds(plr,command)
 		local done = {0,""}
 		for _,v in pairs(targets) do
 			v.Character.Humanoid.Health = v.Character.Humanoid.Health-(tonumber(arg[3]) or 75)
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully damaged "..done[1].." people directly."}
+		else
+			return {true,"Successfully damaged "..done[2].."directly."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."damage <Players> [Damage]"}
+	if arg[1] == module.Prefix.."directdamage" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		if not arg[2] then
+			return {false,"You must mention the targets."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid:TakeDamage(tonumber(arg[3]) or 75)
 			if done[2] ~= "" then
 				done[2] = done[2]..", "..v.Name
 				done[1] = done[1]+1
