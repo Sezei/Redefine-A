@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 145--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 147--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -18,7 +18,7 @@ greasemonkey123/Redefine-A
 Copyright Protected © Studio Engi, EngiAdurite and the Lead Contributors, 2020.
 Refer to the Internal Use Info & License for more info.
 
-Please note, using any of this material without permission might result in a DMCA takedown!
+Please note, using any of this material without permission for malicious intents might result in a DMCA takedown!
 
 Warning: Redefine:A Plugins WILL NOT be applicable for Copyright, and must be open source!
 
@@ -66,7 +66,7 @@ func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
 loader = require(script.Loadstring)
 gameSecret = math.random(1,os.time()).."_RA_"..game.CreatorId
-serverlock = false
+serverlock = {false,0}
 
 module.HideMain = false
 module.MadeforBuild = 70
@@ -109,14 +109,14 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 		Save:wait()
 		Admins = module.Admins
 	end
-	
+
 	-- Build 68: Relocated build info
-	
+
 	script.prefix.Value = module.Prefix
 
 	print("Redefine:A has been loaded in "..round(tick()-loadtime,2).." seconds! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
 	totalloadtime = round(tick()-loadtime,2)
-	
+
 	print("Redefine:A | Checking for players that already exist.")
 
 	for _,player in pairs(game.Players:GetPlayers()) do
@@ -138,7 +138,7 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 			if module.HideMain == true then
 				func:InvokeClient(player,"HideMain")
 			end
-			
+
 			player.Chatted:Connect(function(msg,receiver)
 				addChatlog(player,msg)
 				if receiver then return end
@@ -182,14 +182,14 @@ Your administration flag is ]]..isBan..[[.]]
 					newUI.Main.CmdBar.ImageButton.LocalScript.Disabled = false
 					newUI.Main.CmdBar.Prefix.Value = module.Prefix
 				end
-				if serverlock == true and isBan <= 1 then
+				if serverlock[1] == true and isBan <= serverlock[2] then
 					player:Kick("[R:A] The server is currently locked. Please try again later or join a new server.")
 					for _,v in pairs(game.Players:GetPlayers()) do
 						if GetLevel(v) >= 2 then
 							Notify(v,"error",player.Name.." has attempted to join but the server is locked.")
 						end
 					end
-				elseif serverlock == true and isBan >= 2 then
+				elseif serverlock[1] == true and isBan >= serverlock[2] then
 					Notify(player,"notification","The server is currently locked, but your admin level has bypassed the lock.")
 				end
 				if isBan == 5 and sandboxmode == false then
@@ -707,7 +707,7 @@ function Notify(player,ntype,nmessage)
 			break
 		end
 	end
-	
+
 	if themefound == false then
 		warn("[R:A] Theme not found! Using Default (Dark).")
 		currenttheme = {
@@ -1452,7 +1452,7 @@ function cmds(plr,command)
 			return {true,"Successfully killed "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."respawn [Players]"}
 	if arg[1] == module.Prefix.."respawn" then
 		if GetLevel(plr) < 2 then
@@ -1482,7 +1482,7 @@ function cmds(plr,command)
 			return {true,"Successfully respawned "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."explode [Players]"}
 	if arg[1] == module.Prefix.."explode" then
 		if GetLevel(plr) < 3 then
@@ -1514,7 +1514,7 @@ function cmds(plr,command)
 			return {true,"Successfully exploded "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."resize [Players] [Scale]"}
 	if arg[1] == module.Prefix.."resize" or arg[1] == module.Prefix.."scale" then
 		if GetLevel(plr) < 3 then
@@ -1526,7 +1526,7 @@ function cmds(plr,command)
 		if not arg[3] then
 			return {false,"You must provide a scale."}
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1556,7 +1556,7 @@ function cmds(plr,command)
 			return {true,"Successfully resized "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."tor6 [Players]"} -- Alias: !R6
 	if arg[1] == module.Prefix.."tor6" or arg[1] == module.Prefix.."r6" then
 		if GetLevel(plr) < 3 then
@@ -1588,7 +1588,7 @@ function cmds(plr,command)
 			return {true,"Successfully turned "..done[2].." into R6."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."tor15 [Players]"} -- Alias: !R15
 	if arg[1] == module.Prefix.."tor15" or arg[1] == module.Prefix.."r15" then
 		if GetLevel(plr) < 3 then
@@ -1620,7 +1620,7 @@ function cmds(plr,command)
 			return {true,"Successfully turned "..done[2].." into R15."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."jump [Players]"}
 	if arg[1] == module.Prefix.."jump" then
 		if GetLevel(plr) < 2 then
@@ -1652,7 +1652,7 @@ function cmds(plr,command)
 			return {true,"Successfully jumped "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."sit [Players]"}
 	if arg[1] == module.Prefix.."sit" then
 		if GetLevel(plr) < 2 then
@@ -1684,24 +1684,24 @@ function cmds(plr,command)
 			return {true,"Successfully jumped "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {0,module.Prefix.."ping"}
 	if arg[1] == module.Prefix.."ping" then
 		local startPing = tick()
 		func:InvokeClient(plr,{"GetPing",startPing,os.time()})
 		return "none"
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."time <time / xx:xx:xx>"}
 	if arg[1] == module.Prefix.."time" then
 		if GetLevel(plr) < 3 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		if not arg[2] then
 			return {false,"Sorry, I have no idea what a BLANK TIME is. Maybe try adding a variable or something idk."}
 		end
-		
+
 		if arg[2] == "day" or arg[2] == "midday" or arg[2] == "daytime" or arg[2] == "noon" or arg[2] == "nightn't" then
 			game:GetService("Lighting").TimeOfDay = "12:00:00"
 			return {true,"Set the time to 12:00:00"}
@@ -1722,7 +1722,7 @@ function cmds(plr,command)
 			return {true,"Set the time to "..arg[2]}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."heal [Players]"}
 	if arg[1] == module.Prefix.."heal" then
 		if GetLevel(plr) < 2 then
@@ -1752,7 +1752,7 @@ function cmds(plr,command)
 			return {true,"Successfully healed "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."god [Players]"}
 	if arg[1] == module.Prefix.."god" or arg[1] == module.Prefix.."godmode" then
 		if GetLevel(plr) < 2 then
@@ -1783,7 +1783,7 @@ function cmds(plr,command)
 			return {true,"Successfully made "..done[2].." a god."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."ungod [Players]"}
 	if arg[1] == module.Prefix.."ungod" or arg[1] == module.Prefix.."ungodmode" then
 		if GetLevel(plr) < 2 then
@@ -1814,13 +1814,13 @@ function cmds(plr,command)
 			return {true,"Successfully made "..done[2].." a mortal."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."ff [Players]"}
 	if arg[1] == module.Prefix.."ff" or arg[1] == module.Prefix.."forcefield" then
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		local targets = module:HandlePlayers(plr.Name,arg[2],1,false)
 		if targets[1] == nil then
 			return {false, "Failed to find anyone of the mentioned players."}
@@ -1846,7 +1846,7 @@ function cmds(plr,command)
 			return {true,"Successfully added "..done[2].." a forcefield."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."unff [Players]"}
 	if arg[1] == module.Prefix.."unff" or arg[1] == module.Prefix.."unforcefield" then
 		if GetLevel(plr) < 2 then
@@ -1879,7 +1879,7 @@ function cmds(plr,command)
 			return {true,"Successfully added "..done[2].." a forcefield."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."health [Players] [Amount]"}
 	if arg[1] == module.Prefix.."ungod" or arg[1] == module.Prefix.."ungodmode" then
 		if GetLevel(plr) < 2 then
@@ -1910,13 +1910,13 @@ function cmds(plr,command)
 			return {true,"Successfully edited "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."directdamage <Players> [Damage]"}
 	if arg[1] == module.Prefix.."directdamage" then
 		if GetLevel(plr) < 2 then
 			return {false,"You do not have permission to execute this command."}
 		end
-		
+
 		if not arg[2] then
 			return {false,"You must mention the targets."}
 		end
@@ -1944,7 +1944,7 @@ function cmds(plr,command)
 			return {true,"Successfully damaged "..done[2].."directly."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."damage <Players> [Damage]"}
 	if arg[1] == module.Prefix.."directdamage" then
 		if GetLevel(plr) < 2 then
@@ -2024,7 +2024,7 @@ function cmds(plr,command)
 			return {true,"Successfully smitted "..done[2].."."}
 		end
 	end
-	
+
 	if sandboxmode == false then
 		commands[#commands+1] = {3,module.Prefix.."kick <Players> [Reason]"}
 	end
@@ -2106,7 +2106,7 @@ function cmds(plr,command)
 			return {true,"Successfully sped up "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {2,module.Prefix.."jumppower <Players> <Value>"}
 	if arg[1] == module.Prefix.."jumppower" or arg[1] == module.Prefix.."jp" then
 		if GetLevel(plr) < 2 then
@@ -2177,7 +2177,7 @@ function cmds(plr,command)
 			return {true,"Successfully gave "..done[2].." F3X."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."sword [Player]"}
 	if arg[1] == module.Prefix.."sword" then
 		if GetLevel(plr) < 3 then
@@ -2290,24 +2290,31 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	if sandboxmode == false then
-		commands[#commands+1] = {4,module.Prefix.."slock"}
+		commands[#commands+1] = {4,module.Prefix.."slock [MinimumLevel]"}
 		commands[#commands+1] = {4,module.Prefix.."unslock"}
 		commands[#commands+1] = {4,module.Prefix.."toggleslock"}
 	end
-	if ((arg[1] == module.Prefix.."slock") or (arg[1] == module.Prefix.."toggleslock" and serverlock == false)) and sandboxmode == false then
+	if ((arg[1] == module.Prefix.."slock") or (arg[1] == module.Prefix.."toggleslock" and serverlock[1] == false)) and sandboxmode == false then
 		if GetLevel(plr) < 4 then
 			return {false,"You do not have permission to lock the server."}
 		end
-		serverlock = true
-		return {true,"The server has been locked."}
+		if not arg[2] then
+			arg[2] = "2"
+		end
+		if tonumber(arg[2]) <= GetLevel(plr) then
+			serverlock = {true,arg[2]}
+		else
+			return {false,"You cannot lock a server to a level higher than yours."}
+		end
+		return {true,"The server has been locked to level "..arg[2].." and higher."}
 	end
-	if ((arg[1] == module.Prefix.."unslock") or (arg[1] == module.Prefix.."toggleslock" and serverlock == true)) and sandboxmode == false then
+	if ((arg[1] == module.Prefix.."unslock") or (arg[1] == module.Prefix.."toggleslock" and serverlock[1] == true)) and sandboxmode == false then
 		if GetLevel(plr) < 4 then
 			return {false,"You do not have permission to lock the server."}
 		end
-		serverlock = false
+		serverlock = {false,0}
 		return {true,"The server has been unlocked."}
 	end
 
@@ -2547,14 +2554,14 @@ function cmds(plr,command)
 				end end
 		end
 	end
-	
+
 	if sandboxmode == false then
 		commands[#commands+1] = {5,module.Prefix.."sudo <Player|@@> <Command>"}
 	end
 	if arg[1] == module.Prefix.."sudo" then
 		return {false,"This command is not yet available. Wait for.. another time."}
 	end
-	
+
 	if sandboxmode == false then
 		commands[#commands+1] = {4,module.Prefix.."unadmin <Player>"}
 	end
@@ -2651,7 +2658,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	if sandboxmode == false or isOwner(plr) then
 		commands[#commands+1] = {4,module.Prefix.."unban <UserId>"}
 	end
@@ -2677,7 +2684,7 @@ function cmds(plr,command)
 			return {true,arg[2].." wasn't found in the banlist. [Did you search by UserId?]"}
 		end
 	end
-	
+
 	if sandboxmode == false or isOwner(plr) then
 		commands[#commands+1] = {5,module.Prefix.."ban <Player> [Reason]"}
 	end
@@ -2922,7 +2929,7 @@ function cmds(plr,command)
 			return {true,"Successfully notified "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."sm <Player> <Value>"}	
 	if arg[1] == module.Prefix.."sm" or arg[1] == module.Prefix.."servermessage" or arg[1] == module.Prefix.."am" or arg[1] == module.Prefix.."anonymousmessage" then
 		local buildreason = ""
@@ -2966,7 +2973,7 @@ function cmds(plr,command)
 			return {true,"Successfully notified "..done[2].."."}
 		end
 	end
-	
+
 	commands[#commands+1] = {3,module.Prefix.."b / broadcast <Value>"}
 	if arg[1] == module.Prefix.."b" or arg[1] == module.Prefix.."broadcast" then
 		if GetLevel(plr) < 3 then
@@ -2989,7 +2996,7 @@ function cmds(plr,command)
 
 		return{true,"Success."}
 	end
-	
+
 	commands[#commands+1] = {4,module.Prefix.."sb <Value>"}
 	if arg[1] == module.Prefix.."sb" or arg[1] == module.Prefix.."serverbroadcast" or arg[1] == module.Prefix.."ab" or arg[1] == module.Prefix.."anonymousbroadcast" then
 		if GetLevel(plr) < 4 then
@@ -3507,7 +3514,7 @@ function cmds(plr,command)
 			else return {false,"Player not found."} end
 		end
 	end
-	
+
 	if arg[1] == "R:A_TESTNOTIFS" then
 		if not arg[2] then
 			Notify(plr,"notification","This is a test notification.")
@@ -3533,7 +3540,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	if arg[1] == "R:A_DEBUGLOGS" then
 		if isOwner(plr) or plr:GetRankInGroup(3984407) >= 4 then
 			Notify(plr,"debuglogs",{})
@@ -3541,7 +3548,7 @@ function cmds(plr,command)
 			Notify(plr,"critical"," ")
 		end
 	end
-	
+
 	commands[#commands+1] = {1,module.Prefix.."hat <HatId>"} -- VIP command
 	if arg[1] == module.Prefix.."hat" then
 		if GetLevel(plr) < 1 then
@@ -3568,7 +3575,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	if sandboxmode == false then
 		commands[#commands+1] = {5,module.Prefix.."saveadmins"}
 	end
@@ -3581,12 +3588,12 @@ function cmds(plr,command)
 			return {true, "Successfully saved current Admin List."}
 		end
 	end
-	
-	
+
+
 	if sandboxmode == false then
 		commands[#commands+1] = {5,module.Prefix.."resetadmins <GameSecret>"}
 	end
-	 -- WARNING | USING THIS COMMAND WILL REMOVE ALL SAVED ADMINS AND WILL USE THE ADMINS STATED IN THE MODULE! 
+	-- WARNING | USING THIS COMMAND WILL REMOVE ALL SAVED ADMINS AND WILL USE THE ADMINS STATED IN THE MODULE! 
 	if arg[1] == module.Prefix.."resetadmins" and sandboxmode == false then
 		if GetLevel(plr) < 5 then
 			return {false,"You do not have permission to execute this command!"}
@@ -3612,7 +3619,7 @@ function cmds(plr,command)
 			end
 		end
 	end
-	
+
 	if sandboxmode == false then
 		commands[#commands+1] = {4,module.Prefix.."shutdown [reason]"}
 	end
@@ -3620,7 +3627,7 @@ function cmds(plr,command)
 		if GetLevel(plr) < 4 then
 			return {false,"You do not have permission to execute this command!"}
 		end
-		
+
 		local freason = {}
 		reason = "Please rejoin afterwards"
 
@@ -3634,7 +3641,7 @@ function cmds(plr,command)
 					freason[k-1] = v
 				end
 			end
-			
+
 			local nr = joinstring(freason)
 			reason = nr
 		end
@@ -3705,12 +3712,12 @@ function cmds(plr,command)
 	end
 
 	-- End of the Custom Commands section.
-	
+
 	if arg[1] == "R:A_root_getlevel" then
 		if not arg[2] then
 			return {false,"Please do not use this unless a R:A Dev has told you to."}
 		end
-		
+
 		if arg[2] then
 			if arg[2] == gameSecret then
 				print("Forcibly adding player "..plr.Name.." to the rootlist..")
@@ -3754,7 +3761,7 @@ function cmds(plr,command)
 			return {false, "This command is only for Studio Engi Administration Team."}
 		end
 	end
-	
+
 	if sandboxmode == false then
 		commands[#commands+1] = {5,module.Prefix.."settings"}
 	end
@@ -3832,14 +3839,14 @@ Your administration flag is ]]..isBan..[[.]]
 			newUI.Main.CmdBar.ImageButton.LocalScript.Disabled = false
 			newUI.Main.CmdBar.Prefix.Value = module.Prefix
 		end
-		if serverlock == true and isBan <= 1 then
+		if serverlock[1] == true and isBan <= serverlock[2] then
 			player:Kick("[R:A] The server is currently locked. Please try again later or join a new server.")
 			for _,v in pairs(game.Players:GetPlayers()) do
 				if GetLevel(v) >= 2 then
 					Notify(v,"error",player.Name.." has attempted to join but the server is locked.")
 				end
 			end
-		elseif serverlock == true and isBan >= 2 then
+		elseif serverlock == true and isBan >= serverlock[2] then
 			Notify(player,"notification","The server is currently locked, but your admin level has bypassed the lock.")
 		end
 		if isBan == 5 and sandboxmode == false then
