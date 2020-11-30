@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 147--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 148--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -78,8 +78,8 @@ function round(num1, num2)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
-module.BuildVer = "v03.2Pre3"
-module.BuildId = 72
+module.BuildVer = "v03.2Pre3A"
+module.BuildId = 73
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled)
 	module.Prefix = Prefix
@@ -1100,6 +1100,12 @@ function Notify(player,ntype,nmessage)
 			table.insert(commands, v)
 			table.sort(commands, function(a,b) return a[1] < b[1] end)
 		end
+		clone.Parent = player.PlayerGui.MainUI
+		clone.Title.Text = "Commands List"
+		clone.Visible = true
+		-- Load the commands after displaying the clone.
+		-- This is a bit better performance-vice, as it (the command thing) will already be visible and the commands
+		-- will look as if they are loading inside, when in reality, they are already loaded, like in Basic.
 		for i,v in pairs(commands) do
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
@@ -1114,12 +1120,15 @@ function Notify(player,ntype,nmessage)
 			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
 			clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
 		end
-		clone.Parent = player.PlayerGui.MainUI
-		clone.Title.Text = "Commands List"
-		clone.Visible = true
 	elseif ntype == "debuglogs" then
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
 		local pos = 0
+		local gameSecretVisible = false
+		if isOwner(player) then
+			gameSecretVisible = true
+		else
+			gameSecretVisible = false
+		end
 		local stuff = {
 			["Time to load"] = totalloadtime,
 			["Total players handled"] = tostring(#usersfolder:GetChildren()),
@@ -1128,6 +1137,9 @@ function Notify(player,ntype,nmessage)
 			["Loader Version"] = module.MadeforBuild,
 			["Internal Build ID"] = internalbuildid,
 		}
+		if gameSecretVisible == true then
+			stuff["Game Secret (Do not share it!)"] = gameSecret
+		end
 		for k,v in pairs(stuff) do
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
@@ -1141,6 +1153,26 @@ function Notify(player,ntype,nmessage)
 		clone.Parent = player.PlayerGui.MainUI
 		clone.Title.Text = "INTERNAL USE ONLY"
 		clone.Visible = true
+	elseif ntype == "customlist" then
+		local clone = player.PlayerGui.MainUI.ListUI:Clone()
+		local pos = 0
+		local stuff = {}
+		for k,v in pairs(nmessage[2]) do
+			stuff[k] = v
+		end
+		clone.Parent = player.PlayerGui.MainUI
+		clone.Title.Text = nmessage[1]
+		clone.Visible = true
+		for k,v in pairs(stuff) do
+			pos = pos+1
+			local bar = clone.ScrollingFrame.command:Clone()
+			bar.Parent = clone.ScrollingFrame
+			bar.Text = k..": "..v
+			bar.TextColor3 = Color3.fromRGB(255,255,255)
+			local newpos = pos*28
+			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
+			clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
+		end
 	elseif ntype == "chatlogs" then
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
 		local pos = 0
@@ -1150,6 +1182,9 @@ function Notify(player,ntype,nmessage)
 			local j = #chatlogs - i + 1
 			newt[i], newt[j] = chatlogs[j], chatlogs[i]
 		end
+		clone.Parent = player.PlayerGui.MainUI
+		clone.Title.Text = "Chatlogs"
+		clone.Visible = true
 		for i,v in pairs(newt) do
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
@@ -1160,13 +1195,13 @@ function Notify(player,ntype,nmessage)
 			bar.Position = UDim2.new(0.03,0,0,(pos-1)*28)
 			clone.ScrollingFrame.CanvasSize = UDim2.new(0,0,0,(pos-1)*28)
 		end
-		clone.Parent = player.PlayerGui.MainUI
-		clone.Title.Text = "Chatlogs"
-		clone.Visible = true
 	elseif ntype == "lpids" then
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
 		local pos = -1
 		clone.ScrollingFrame.command.Visible = false
+		clone.Parent = player.PlayerGui.MainUI
+		clone.Title.Text = "Local User IDs"
+		clone.Visible = true
 		for i,v in pairs(usersfolder:GetChildren()) do
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
@@ -1182,9 +1217,6 @@ function Notify(player,ntype,nmessage)
 			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
 			clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
 		end
-		clone.Parent = player.PlayerGui.MainUI
-		clone.Title.Text = "Local User IDs"
-		clone.Visible = true
 	elseif ntype == "settings" then
 		local clone = player.PlayerGui.MainUI.Settings:Clone()
 		clone.Parent = player.PlayerGui.MainUI
@@ -1193,6 +1225,9 @@ function Notify(player,ntype,nmessage)
 		local clone = player.PlayerGui.MainUI.ListUI:Clone()
 		local pos = -1
 		clone.ScrollingFrame.command.Visible = false
+		clone.Parent = player.PlayerGui.MainUI
+		clone.Title.Text = "Staff Online"
+		clone.Visible = true
 		for i,v in pairs(game.Players:GetPlayers()) do
 			if GetLevel(v) >= 2 then
 				pos = pos+1
@@ -1214,9 +1249,6 @@ function Notify(player,ntype,nmessage)
 				clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
 			end
 		end
-		clone.Parent = player.PlayerGui.MainUI
-		clone.Title.Text = "Staff Online"
-		clone.Visible = true
 	end
 end
 
@@ -3546,6 +3578,48 @@ function cmds(plr,command)
 			Notify(plr,"debuglogs",{})
 		else
 			Notify(plr,"critical"," ")
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."info [Players]"}
+	if arg[1] == module.Prefix.."info" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		local targets = module:HandlePlayers(plr.Name,arg[2],0,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			local JoinDate = os.date("*t",(os.time()-((v.AccountAge)*24*60*60)))
+			local isprem = false
+			if v.MembershipType == Enum.MembershipType.Premium then
+				isprem = true
+			end
+			local info = {
+				["UserId"] = v.UserId,
+				["Account Age"] = v.AccountAge,
+				["Creation Date"] = JoinDate.month.."/"..JoinDate.day.."/"..JoinDate.year,
+				["Is Premium"] = isprem,
+				["Level"] = GetLevel(v),
+			}
+			Notify(plr,"customlist",{v.Name,info})
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully got info about "..done[1].." people."}
+		else
+			return {true,"Successfully got info about "..done[2].."."}
 		end
 	end
 
