@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 148--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 149--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -799,6 +799,9 @@ function Notify(player,ntype,nmessage)
 			new.posnum.Value = pos
 			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
 		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
+		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(0,0.666667,1)
 		new.Visible = true
@@ -860,6 +863,9 @@ function Notify(player,ntype,nmessage)
 			until foundpos == false and whichposfound ~= 0
 			new.posnum.Value = pos
 			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
 		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(0.666667, 1, 0.498039)
@@ -923,6 +929,9 @@ function Notify(player,ntype,nmessage)
 			new.posnum.Value = pos
 			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
 		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
+		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(1,0.666667,0)
 		new.Visible = true
@@ -985,6 +994,8 @@ function Notify(player,ntype,nmessage)
 			new.posnum.Value = pos
 			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
 		end
+		-- critical is not to be used for seasonal themes.
+		-- the reason is that all of the text needs to be visible unlike others.
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(1, 1, 1)
 		new.BackgroundColor3 = Color3.new(1,0.345098,0.345098)
@@ -1047,6 +1058,9 @@ function Notify(player,ntype,nmessage)
 			until foundpos == false and whichposfound ~= 0
 			new.posnum.Value = pos
 			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
 		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(1, 1, 1)
