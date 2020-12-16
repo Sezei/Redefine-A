@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 149--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 150--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -62,6 +62,7 @@ userids = 0
 event = Instance.new("RemoteEvent",game:GetService("ReplicatedStorage"))
 event.Name = "RedefineANotificationsHandler"
 func = Instance.new("RemoteFunction",game:GetService("ReplicatedStorage"))
+hatedservice = game:GetService("TextService")
 func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
 loader = require(script.Loadstring)
@@ -78,10 +79,10 @@ function round(num1, num2)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
-module.BuildVer = "v03.2Pre3A"
-module.BuildId = 73
+module.BuildVer = "v03.2A"
+module.BuildId = 75
 
-function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled)
+function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled,FilteringEnabled)
 	module.Prefix = Prefix
 	module.SilentEnabled = SilentEnabled
 	module.Admins = Admins
@@ -99,6 +100,7 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 	module.MadeforBuild = MadeforBuild or 68 -- haha no.
 	module.HideMain = HideMain or false
 	module.SeasonalThemes = SeasonsEnabled or true
+	module.FilterText = FilteringEnabled or true -- Forcefully true if they didn't update the module. Thank roblox for that, not me.
 
 	if module.EnableGlobalBanList == true then
 		require(2498483497)
@@ -801,6 +803,8 @@ function Notify(player,ntype,nmessage)
 		end
 		if module.SeasonalThemes == true then
 			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
 		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(0,0.666667,1)
@@ -866,6 +870,8 @@ function Notify(player,ntype,nmessage)
 		end
 		if module.SeasonalThemes == true then
 			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
 		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(0.666667, 1, 0.498039)
@@ -931,6 +937,8 @@ function Notify(player,ntype,nmessage)
 		end
 		if module.SeasonalThemes == true then
 			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
 		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(1,0.666667,0)
@@ -1061,6 +1069,8 @@ function Notify(player,ntype,nmessage)
 		end
 		if module.SeasonalThemes == true then
 			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
 		end
 		new.Text = nmessage
 		new.TextColor3 = Color3.new(1, 1, 1)
@@ -1560,7 +1570,85 @@ function cmds(plr,command)
 			return {true,"Successfully exploded "..done[2].."."}
 		end
 	end
+	
+	commands[#commands+1] = {3,module.Prefix.."gear <Players> <ID>"}
+	if arg[1] == module.Prefix.."gear" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
 
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		
+		local gear = game:GetService("InsertService"):LoadAsset(tonumber(arg[3])):GetChildren()
+		if #gear < 1 then
+			return {false,"The gear ID has failed to load. Did you type it correctly?"}
+		end
+		local allgear=gear
+		gear = gear[1]
+		if not gear:IsA("Tool") then
+			return {false, "That... uh... isn't exactly what a gear is.....?"}
+		end
+		for _,v in pairs(targets) do
+			gear:Clone().Parent = v.Backpack
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		allgear:Destroy() -- Cleanup
+		if done[1] >= 5 then
+			return {true,"Successfully gave "..done[1].." people the gear."}
+		else
+			return {true,"Successfully gave "..done[2].." the gear."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."face <Players> <ID>"}
+	if arg[1] == module.Prefix.."face" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+
+		local asset = game:GetService("InsertService"):LoadAsset(tonumber(arg[3])):GetChildren()[1]
+		if (not asset:IsA("Decal")) then
+			return false,"That is not a face."
+		end
+		
+		for _,v in pairs(targets) do
+			v.Character.Head.face.Texture = asset.Texture
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		asset:Destroy() -- Cleanup
+		if done[1] >= 5 then
+			return {true,"Successfully changed "..done[1].." people' faces."}
+		else
+			return {true,"Successfully changed "..done[2].."'s face(s)."}
+		end
+	end
+	
 	commands[#commands+1] = {3,module.Prefix.."resize [Players] [Scale]"}
 	if arg[1] == module.Prefix.."resize" or arg[1] == module.Prefix.."scale" then
 		if GetLevel(plr) < 3 then
@@ -2872,6 +2960,9 @@ function cmds(plr,command)
 		end
 		local done = {0,""}
 		for _,v in pairs(targets) do
+			if module.FilterText == true then
+				local buildreason = hatedservice:FilterStringAsync(buildreason or "?",v.UserId)
+			end
 			Notify(v,"notification",buildreason or "?")
 			if done[2] ~= "" then
 				done[2] = done[2]..", "..v.Name
@@ -2916,6 +3007,9 @@ function cmds(plr,command)
 		end
 		local done = {0,""}
 		for _,v in pairs(targets) do
+			if module.FilterText == true then
+				local buildreason = hatedservice:FilterStringAsync(buildreason or "?",v.UserId)
+			end
 			Notify(v,"critical",buildreason or "?")
 			if done[2] ~= "" then
 				done[2] = done[2]..", "..v.Name
@@ -2960,6 +3054,9 @@ function cmds(plr,command)
 		end
 		local done = {0,""}
 		for _,v in pairs(targets) do
+			if module.FilterText == true then
+				local buildreason = hatedservice:FilterStringAsync(buildreason or "?",v.UserId)
+			end
 			Notify(v,"newmsg",{"Message by "..plr.Name,buildreason or "?"})
 			if done[2] ~= "" then
 				done[2] = done[2]..", "..v.Name
@@ -3004,6 +3101,9 @@ function cmds(plr,command)
 		end
 		local done = {0,""}
 		for _,v in pairs(targets) do
+			if module.FilterText == true then
+				local buildreason = hatedservice:FilterStringAsync(buildreason or "?",v.UserId)
+			end
 			Notify(v,"newmsg",{"Message by Server",buildreason or "?"})
 			if done[2] ~= "" then
 				done[2] = done[2]..", "..v.Name
@@ -3037,6 +3137,9 @@ function cmds(plr,command)
 
 		for _,v in pairs(game.Players:GetPlayers()) do
 			local new = script.FullScreenNotification:Clone()
+			if module.FilterText == true then
+				local buildreason = hatedservice:FilterStringAsync(buildreason or "?",v.UserId)
+			end
 			Notify(v,"newmsg",{"Message by "..plr.Name,buildreason or "?"})
 		end
 
@@ -3060,6 +3163,9 @@ function cmds(plr,command)
 
 		for _,v in pairs(game.Players:GetPlayers()) do
 			local new = script.FullScreenNotification:Clone()
+			if module.FilterText == true then
+				local buildreason = hatedservice:FilterStringAsync(buildreason or "?",v.UserId)
+			end
 			Notify(v,"newmsg",{"Server Message",buildreason or "?"})
 		end
 
@@ -3614,12 +3720,20 @@ function cmds(plr,command)
 			if v.MembershipType == Enum.MembershipType.Premium then
 				isprem = true
 			end
+			local safechat = true -- True until proven false.
+			local scres = hatedservice:FilterStringAsync("C7RN", v.UserId)
+			if scres == "####" then
+				safechat = true
+			elseif scres == "C7RN" then
+				safechat = false
+			end
 			local info = {
-				["UserId"] = v.UserId,
-				["Account Age"] = v.AccountAge,
-				["Creation Date"] = JoinDate.month.."/"..JoinDate.day.."/"..JoinDate.year,
-				["Is Premium"] = isprem,
-				["Level"] = GetLevel(v),
+				["UserId"] = tostring(v.UserId),
+				["Account Age"] = tostring(v.AccountAge),
+				["Creation Date"] = tostring(JoinDate.day).."/"..tostring(JoinDate.month).."/"..tostring(JoinDate.year),
+				["Is Premium"] = tostring(isprem),
+				["Level"] = tostring(GetLevel(v)),
+				["SafeChat"] = tostring(safechat),
 			}
 			Notify(plr,"customlist",{v.Name,info})
 			if done[2] ~= "" then
