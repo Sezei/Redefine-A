@@ -1,6 +1,9 @@
 {
 	"LatestVersion": "v03.2A",
-	"BuildId": "75",
-	"UpdateType": "critical",
-	"LatestCriticalBuild": "75"
+	"BuildId": "76",
+	"UpdateType": "notification",
+	"LatestCriticalBuild": "75",
+	"GlobalAnnouncment": "",
+	"GA_Type": "none",
+	"GA_Level": "5"
 }
