@@ -18,6 +18,7 @@
 
 local dbs = require(script.Parent.Parent.DataStorage)
 local pdb = dbs:GetCategory("PluginStorage_RedefineA_Desktop")
+local http = game:GetService("HttpService")
 
 module.pName = "desktop"
 module.pType = "Command"
@@ -37,9 +38,34 @@ function module:Fired(args,libs)	-- This function is activated whenever the comm
 	terminalcoms.Parent = ops
 	ops.Enviroment.Prefix.Value = script.Parent.Parent.prefix.Value
 	ops.Parent = plr.PlayerGui
-	ops.Enviroment.Login.ImageLabel.LocalScript.Disabled = false
+	print("Loading FirstTimeDisplayed")
+	local load = pdb:Load(plr.UserId.."s_desktop_FirstTimeDisplayed")
+	load:wait()
+	if load.Data then
+		print("Data Exists: "..tostring(load.Data))
+		if load.Data == true then
+			ops.Enviroment.Login.Visible = true
+			ops.Enviroment.FirstLogin.Visible = false
+			ops.Enviroment.ImageLabel.Visible = true
+			ops.Enviroment.Login.ImageLabel.LocalScript.Disabled = false
+		else
+			ops.Enviroment.FirstLogin.mainanimation.Disabled = false
+		end
+	else
+		print("Data is nil.")
+		ops.Enviroment.FirstLogin.mainanimation.Disabled = false
+	end
 	return {true,"Loading, please wait."}
 end
+
+function isHttpEnabled() -- Check if HTTP is enabled for the app store load.
+	local s = pcall(function()
+		http:GetAsync('http://www.google.com/')
+	end)
+	return s
+end
+
+storecache = {}
 
 function Load() -- This function is activated when this plugin has been loaded. (No args.) (Returns the plugin itself.)
 	local sfunc = Instance.new("RemoteFunction")
@@ -57,6 +83,16 @@ function Load() -- This function is activated when this plugin has been loaded. 
 				return "Cancel_TooLong"
 			else
 				return load.Data
+			end
+		elseif invoketype == "StoreLoad" then
+			if isHttpEnabled() == true then
+				if not storecache then
+					local data = http:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
+					storecache = http:JSONDecode(data)
+				end
+				return {true,storecache}
+			else
+				return {false,"http_disabled"}
 			end
 		end
 	end)
