@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 150--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 153--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -63,6 +63,7 @@ event = Instance.new("RemoteEvent",game:GetService("ReplicatedStorage"))
 event.Name = "RedefineANotificationsHandler"
 func = Instance.new("RemoteFunction",game:GetService("ReplicatedStorage"))
 hatedservice = game:GetService("TextService")
+serverstore = game:GetService("ServerStorage")
 func.Name = "RARemoteFunction"
 HttpService = game:GetService("HttpService")
 loader = require(script.Loadstring)
@@ -80,7 +81,7 @@ function round(num1, num2)
 end
 
 module.BuildVer = "v03.2A"
-module.BuildId = 75
+module.BuildId = 76
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled,FilteringEnabled)
 	module.Prefix = Prefix
@@ -199,7 +200,12 @@ Your administration flag is ]]..isBan..[[.]]
 						if isHttpEnabled() == true then
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 							local checkNew = HttpService:JSONDecode(data)
-							if checkNew.LatestVersion == module.BuildVer then
+							if checkNew.BuildId == module.BuildId then
+								if checkNew.GA_Type ~= "none" then
+									if GetLevel(player) >= checkNew.GA_Level then
+										Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
+									end
+								end
 							else
 								if tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 									Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
@@ -208,13 +214,18 @@ Your administration flag is ]]..isBan..[[.]]
 								end
 							end
 						else
-							Notify(player,"error","HTTP Service is disabled, therefore we can't check if the version is up-to-date. The admin will still function properly, however.")
+							Notify(player,"error","HTTP Service is disabled, therefore we can't check if the version is up-to-date. The admin will still function properly and as expected, however.")
 						end
 					elseif module.UpdateEnabled == false then
 						if isHttpEnabled() == true then
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 							local checkNew = HttpService:JSONDecode(data)
-							if checkNew.LatestVersion == module.BuildVer then
+							if checkNew.BuildId == module.BuildId then
+								if checkNew.GA_Type ~= "none" then
+									if GetLevel(player) >= checkNew.GA_Level then
+										Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
+									end
+								end
 							elseif tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 								Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 							end
@@ -3171,6 +3182,93 @@ function cmds(plr,command)
 
 		return{true,"Success."}
 	end
+	
+	commands[#commands+1] = {5,module.Prefix.."evaluate <Lua>"}
+	if arg[1] == module.Prefix.."evaluate" or arg[1] == module.Prefix.."eval" or arg[1] == module.Prefix.."script" or arg[1] == module.Prefix.."loadscript" then
+		if GetLevel(plr) < 5 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		if not arg[2] then
+			return {false,"A script must be provided."}
+		end
+
+		if arg[2] then
+			buildreason = ""
+			for _,v in pairs(arg) do
+				if v ~= arg[1] then
+					buildreason = buildreason.." "..v
+				end
+			end
+		end
+		
+		local res = LoadScript(plr,buildreason)
+		
+		if tostring(res) == "true" then
+			return{true,"Evaluation successful."}
+		else
+			return{false,"Evaluation compilation error: "..tostring(res)}
+		end
+	end
+	
+	commands[#commands+1] = {4,module.Prefix.."savews"}-- This part has been ported over from SimpleAdmin package bundle called "Map Controllers" by light.
+	if arg[1] == module.Prefix.."savews" or arg[1] == module.Prefix.."savemap" or arg[1] == module.Prefix.."backupmap" or arg[1] == module.Prefix.."backupws" then
+		if GetLevel(plr) < 4 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		if serverstore:FindFirstChild("ra_wsbackup") then
+			serverstore.ra_wsbackup:Destroy(); -- Save up resources.
+		end
+
+		local Players = game:GetService("Players")
+		local wsstore = Instance.new("Folder",serverstore);
+		wsstore.Name = "ra_wsbackup"
+		
+		for i, part in ipairs(workspace:GetChildren()) do
+			pcall(function()
+				if Players:FindFirstChild(part.Name) == nil then
+					local cloned = part:Clone()
+					cloned.Parent = wsstore
+					wait()	
+				end		
+			end)
+		end	
+		
+		return{true,"Workspace saved: About ".. tostring( #workspace:GetChildren()/128 ).."KB of data has been saved"}
+	end
+	
+	commands[#commands+1] = {4,module.Prefix.."resetws"}-- This part has been ported over from SimpleAdmin package bundle called "Map Controllers" by light.
+	if arg[1] == module.Prefix.."resetws" or arg[1] == module.Prefix.."loadmap" or arg[1] == module.Prefix.."restoremap" or arg[1] == module.Prefix.."restorews" then
+		if GetLevel(plr) < 4 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		local Players = game:GetService("Players")
+
+		if serverstore:FindFirstChild("ra_wsbackup") then
+			for i,v in pairs(workspace:GetChildren()) do
+				if Players:FindFirstChild(v.Name) == nil then
+					pcall(function()
+						v:Destroy()
+						wait()
+					end)
+				end
+			end
+			for i, part in ipairs(serverstore.ra_wsbackup:GetChildren()) do
+				pcall(function()
+
+					local cloned = part:Clone()
+					cloned.Parent = workspace
+					wait()
+
+				end)
+			end	
+			return{true,"Workspace loaded."}
+		else
+			return{false,"No backup has been created sadly. Nothing to restore from."}
+		end
+	end
 
 	commands[#commands+1] = {1,module.Prefix.."fire / burn [Player]"} -- VIP command
 	if arg[1] == module.Prefix.."fire" or arg[1] == module.Prefix.."burn" then
@@ -4057,6 +4155,11 @@ Your administration flag is ]]..isBan..[[.]]
 					local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
+						if checkNew.GA_Type ~= "none" then
+							if GetLevel(player) >= checkNew.GA_Level then
+								Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
+							end
+						end
 					else
 						if tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 							Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
@@ -4072,6 +4175,11 @@ Your administration flag is ]]..isBan..[[.]]
 					local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
+						if checkNew.GA_Type ~= "none" then
+							if GetLevel(player) >= checkNew.GA_Level then
+								Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
+							end
+						end
 					elseif tonumber(checkNew.LatestCriticalBuild) > module.MadeforBuild then
 						Notify(player,"critical","A Critical update is awaiting! Please update the Redefine:A loader script!")
 					end
