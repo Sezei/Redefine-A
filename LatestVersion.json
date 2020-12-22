@@ -3,7 +3,7 @@
 	"BuildId": "76",
 	"UpdateType": "notification",
 	"LatestCriticalBuild": "75",
-	"GlobalAnnouncment": "",
-	"GA_Type": "none",
+	"GlobalAnnouncment": "Test Announcment (Feel free to ignore this)",
+	"GA_Type": "error",
 	"GA_Level": "5"
 }
