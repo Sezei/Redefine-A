@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 153--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 157--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -54,7 +54,14 @@ loadtime = tick()
 totalloadtime = 0
 
 dbs = require(script.DataStorage)
-db = dbs:GetCategory("Admin_RedefineA")
+mdb = dbs:GetCategory("Main_RedefineA")
+local dbcat = mdb:Load("admincat")
+dbcat:wait()
+if dbcat.Data then
+	db = dbs:GetCategory(dbcat.Data)
+else
+	db = dbs:GetCategory("Admin_RedefineA")
+end
 pdb = dbs:GetCategory("PluginStorage_RedefineA")
 notificationsfolder = Instance.new("Folder",game.ReplicatedStorage)
 usersfolder = Instance.new("Folder",game.ReplicatedStorage)
@@ -71,7 +78,7 @@ gameSecret = math.random(1,os.time()).."_RA_"..game.CreatorId
 serverlock = {false,0}
 
 module.HideMain = false
-module.MadeforBuild = 70
+module.MadeforBuild = 70 -- default. won't disturb anything if the admin loads everything before anyone joins. (However: Studio plays might get disturbed because of this.)
 Loaded = false
 module.SeasonalThemes = true
 
@@ -80,8 +87,8 @@ function round(num1, num2)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
-module.BuildVer = "v03.2A"
-module.BuildId = 76
+module.BuildVer = "v03.3"
+module.BuildId = 77
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled,FilteringEnabled)
 	module.Prefix = Prefix
@@ -113,7 +120,7 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 		Admins = module.Admins
 	end
 
-	-- Build 68: Relocated build info
+	-- Build 68 (142 internally): Relocated build info
 
 	script.prefix.Value = module.Prefix
 
@@ -200,9 +207,9 @@ Your administration flag is ]]..isBan..[[.]]
 						if isHttpEnabled() == true then
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 							local checkNew = HttpService:JSONDecode(data)
-							if checkNew.BuildId == module.BuildId then
+							if tonumber(checkNew.BuildId) == module.BuildId then
 								if checkNew.GA_Type ~= "none" then
-									if GetLevel(player) >= checkNew.GA_Level then
+									if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 										Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 									end
 								end
@@ -220,9 +227,9 @@ Your administration flag is ]]..isBan..[[.]]
 						if isHttpEnabled() == true then
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 							local checkNew = HttpService:JSONDecode(data)
-							if checkNew.BuildId == module.BuildId then
+							if tonumber(checkNew.BuildId) == module.BuildId then
 								if checkNew.GA_Type ~= "none" then
-									if GetLevel(player) >= checkNew.GA_Level then
+									if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 										Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 									end
 								end
@@ -253,7 +260,7 @@ CustomCommands = {}
 Extras = {} -- Libraries and undefined stuff.
 extracolors = require(script.RedefineColor3Strings)
 
-module.Theme = "Light" --Default theme in case of a.... well, failed theme selection.
+module.Theme = "Dark" --Default theme in case of a.... well, failed theme selection.
 
 
 Themes[#Themes+1] = { -- Light
@@ -1145,12 +1152,15 @@ function Notify(player,ntype,nmessage)
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
 			bar.Parent = clone.ScrollingFrame
-			bar.Text = v[1].." | "..v[2]
-			if tonumber(v[1]) <= GetLevel(player) then
+			if v[1] == 6 and isOwner(player) or tonumber(v[1]) <= GetLevel(player) then
 				bar.TextColor3 = Color3.fromRGB(255,255,255)
 			else
 				bar.TextColor3 = Color3.fromRGB(155,155,155)
 			end
+			if v[1] == 6 then
+				v[1] = "#"
+			end
+			bar.Text = v[1].." | "..v[2]
 			local newpos = pos*28
 			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
 			clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
@@ -1171,9 +1181,11 @@ function Notify(player,ntype,nmessage)
 			["Build Version"] = module.BuildVer,
 			["Loader Version"] = module.MadeforBuild,
 			["Internal Build ID"] = internalbuildid,
+			["Current Admin Datastore"] = db.Name,
+			["Default Admin Datastore"] = "Admin_RedefineA",
 		}
 		if gameSecretVisible == true then
-			stuff["Game Secret (Do not share it!)"] = gameSecret
+			stuff["Game Secret"] = gameSecret
 		end
 		for k,v in pairs(stuff) do
 			pos = pos+1
@@ -1489,6 +1501,13 @@ function cmds(plr,command)
 	local arg = splitstring(command," ")
 	local commands = {}
 	local buildreason = nil -- Resets the reason every execution of command. (00E)
+	
+	if arg[1] == "/e" and module.SilentEnabled == true then -- IB 155 : SilentEnabled finally added because my primitive mankeh brain forgot to add this 100 builds ago.
+		for k,v in pairs(arg) do
+			arg[k-1] = v
+			arg[k] = nil
+		end
+	end
 
 	commands[#commands+1] = {2,module.Prefix.."kill [Players]"}
 	if arg[1] == module.Prefix.."kill" then
@@ -4063,10 +4082,10 @@ function cmds(plr,command)
 	end
 
 	if sandboxmode == false then
-		commands[#commands+1] = {5,module.Prefix.."settings"}
+		commands[#commands+1] = {6,module.Prefix.."settings"}
 	end
 	if arg[1] == module.Prefix.."settings" and sandboxmode == false then
-		if GetLevel(plr) < 5 then
+		if not isOwner(plr) then
 			return {false,"You do not have permission to execute this command!"}
 		end
 		Notify(plr,"settings",commands)
@@ -4156,7 +4175,7 @@ Your administration flag is ]]..isBan..[[.]]
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
 						if checkNew.GA_Type ~= "none" then
-							if GetLevel(player) >= checkNew.GA_Level then
+							if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 								Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 							end
 						end
@@ -4176,7 +4195,7 @@ Your administration flag is ]]..isBan..[[.]]
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
 						if checkNew.GA_Type ~= "none" then
-							if GetLevel(player) >= checkNew.GA_Level then
+							if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 								Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 							end
 						end
@@ -4346,7 +4365,7 @@ func.OnServerInvoke = (function(plr,invoketype)
 					end
 				end
 			else
-				plr:Kick("An internal server error has occured while attempting to remove "..invoketype[3].." to the Admins list.")
+				plr:Kick("An internal server error has occured while attempting to remove "..invoketype[3].." from the Admins list.")
 				for _,v in pairs(game:GetService("Players"):GetPlayers()) do
 					if GetLevel(v) >= 2 then
 						Notify(v,"critical",plr.Name.." has been kicked for triggering a remote trap.")
@@ -4390,6 +4409,41 @@ event.OnServerEvent:Connect(function(player,verysecretivekey,hmmm)
 			if v.Name == "Notification" or v.Name == "UImsg" or v.Name == "Welcome" then
 				if v.FullFrame.Position.Y.Offset < tonumber(hmmm) then
 					v.FullFrame:TweenPosition(UDim2.new(0.699, 0, 0.876, (v.FullFrame.Position.Y.Offset + 50)),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.25,true)
+				end
+			end
+		end
+	elseif verysecretivekey == "dbedit" then
+		if GetLevel(player) < 5 and not isOwner(player) then
+			for _,v in pairs(game:GetService("Players"):GetPlayers()) do
+				if GetLevel(v) >= 2 then
+					Notify(v,"critical",player.Name.." has been kicked for triggering a remote trap.")
+				end
+			end
+			player:Kick("As much as I'd say I'm impressed you tried, I'm not. The admin is literally open source and you probably exploited that. No. Get out. Don't return here ever again unless you will stop exploiting. Even calling you an exploiter is a bit of a stretch. How about calling you a script kiddie? Oh, no? wL too bad I'm calling you a skid because that's what you are. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id risus magna. Oh! Almost forgot to mention, all of the admins were notified of your silly action.")
+		elseif isOwner(player) then
+			if hmmm[1] == "mg" then
+				Notify(player,"notification","Migrating the current datastore ("..db.Name..") to the new one ("..hmmm[2]..").");
+				local sav = mdb:Save("admincat",hmmm[2])
+				sav:wait()
+				local ndb = dbs:GetCategory(hmmm[2])
+				local AdminList = db:Load("AdminList")
+				AdminList:wait()
+				local AdminListMigrate = ndb:Save("AdminList",AdminList.Data)
+				AdminListMigrate:wait()
+				if AdminListMigrate.Complete and sav.Complete then
+					Notify(player,"done","Migration has finished successfully. No further action is needed.")
+					db = ndb
+				else
+					Notify(player,"critical","An error has occured while migrating datastores. Please try again!")
+				end
+			elseif hmmm[1] == "nmg" then
+				Notify(player,"notification","Changing the datastore without migrating. Please wait.");
+				local sav = mdb:Save("admincat",hmmm[2])
+				sav:wait()
+				if sav.Complete then
+					Notify(player,"done","The datastore has been switched. Please shut down in order to complete it.")
+				else
+					Notify(player,"critical","An error has occured while switching datastores. Please try again.")
 				end
 			end
 		end
