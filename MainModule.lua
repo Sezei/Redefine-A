@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 153--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
+--[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local Module = {};local module = {};local internalbuildid = 159--[[ requir- HA! U GOT FOOLED! no, there are no backdoors here.																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			Hello!
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -54,8 +54,16 @@ loadtime = tick()
 totalloadtime = 0
 
 dbs = require(script.DataStorage)
-db = dbs:GetCategory("Admin_RedefineA")
+mdb = dbs:GetCategory("Main_RedefineA")
+local dbcat = mdb:Load("admincat")
+dbcat:wait()
+if dbcat.Data then
+	db = dbs:GetCategory(dbcat.Data)
+else
+	db = dbs:GetCategory("Admin_RedefineA")
+end
 pdb = dbs:GetCategory("PluginStorage_RedefineA")
+warns = {} -- Internal Folder.
 notificationsfolder = Instance.new("Folder",game.ReplicatedStorage)
 usersfolder = Instance.new("Folder",game.ReplicatedStorage)
 userids = 0
@@ -71,7 +79,7 @@ gameSecret = math.random(1,os.time()).."_RA_"..game.CreatorId
 serverlock = {false,0}
 
 module.HideMain = false
-module.MadeforBuild = 70
+module.MadeforBuild = 70 -- default. won't disturb anything if the admin loads everything before anyone joins. (However: Studio plays might get disturbed because of this.)
 Loaded = false
 module.SeasonalThemes = true
 
@@ -80,8 +88,8 @@ function round(num1, num2)
 	return math.floor(num1 * mult + 0.5) / mult
 end
 
-module.BuildVer = "v03.2A"
-module.BuildId = 76
+module.BuildVer = "v03.3B1"
+module.BuildId = 77
 
 function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMessage,DefaultBanReason,EnableGlobalBanList,AutomaticAdminSave,SaveEvery,VIPAllowed,LegacyUI,AutoUpdate,MadeforBuild,HideMain,SeasonsEnabled,FilteringEnabled)
 	module.Prefix = Prefix
@@ -113,11 +121,11 @@ function Module:Load(Prefix,SilentEnabled,Admins,GroupAdmin,VIPAdmin,Theme,BanMe
 		Admins = module.Admins
 	end
 
-	-- Build 68: Relocated build info
+	-- Build 68 (142 internally): Relocated build info
 
 	script.prefix.Value = module.Prefix
 
-	print("Redefine:A has been loaded in "..round(tick()-loadtime,2).." seconds! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer)
+	print("Redefine:A has been loaded in "..round(tick()-loadtime,2).." seconds! | Prefix; "..module.Prefix.." | Game Secret; "..gameSecret.." (Do not share it!) | R:A Version; "..module.BuildVer);
 	totalloadtime = round(tick()-loadtime,2)
 
 	print("Redefine:A | Checking for players that already exist.")
@@ -196,13 +204,14 @@ Your administration flag is ]]..isBan..[[.]]
 					Notify(player,"notification","The server is currently locked, but your admin level has bypassed the lock.")
 				end
 				if isBan == 5 and sandboxmode == false then
+					--Notify(player,"perror","Warning: Internal builds are extremely unstable and can rip your eyes out of the sockets.")
 					if module.UpdateEnabled == true then
 						if isHttpEnabled() == true then
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 							local checkNew = HttpService:JSONDecode(data)
-							if checkNew.BuildId == module.BuildId then
+							if tonumber(checkNew.BuildId) == module.BuildId then
 								if checkNew.GA_Type ~= "none" then
-									if GetLevel(player) >= checkNew.GA_Level then
+									if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 										Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 									end
 								end
@@ -220,9 +229,9 @@ Your administration flag is ]]..isBan..[[.]]
 						if isHttpEnabled() == true then
 							local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 							local checkNew = HttpService:JSONDecode(data)
-							if checkNew.BuildId == module.BuildId then
+							if tonumber(checkNew.BuildId) == module.BuildId then
 								if checkNew.GA_Type ~= "none" then
-									if GetLevel(player) >= checkNew.GA_Level then
+									if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 										Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 									end
 								end
@@ -253,7 +262,7 @@ CustomCommands = {}
 Extras = {} -- Libraries and undefined stuff.
 extracolors = require(script.RedefineColor3Strings)
 
-module.Theme = "Light" --Default theme in case of a.... well, failed theme selection.
+module.Theme = "Dark" --Default theme in case of a.... well, failed theme selection.
 
 
 Themes[#Themes+1] = { -- Light
@@ -763,8 +772,324 @@ function Notify(player,ntype,nmessage)
 	script.CommandBar.FullFrame.Prefix.TextColor3 = currenttheme.Theme["TextColor"]
 	script.CommandBar.FullFrame.ImageColor3 = currenttheme.Theme["BackgroundColor"]
 	script.CommandBar.FullFrame.Command.TextColor3 = currenttheme.Theme["TextColor"]
-
-	if ntype == "welcome" then
+	
+	if ntype == "pwelcome" then
+		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(0,0.666667,1)
+		new.Visible = true
+		new.Sound:Play()
+		new.MouseButton1Click:Connect(function()
+			new.Click:Play()
+			new.Visible = false
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer.Visible = false
+	elseif ntype == "pdone" then
+		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(0.666667, 1, 0.498039)
+		new.Visible = true
+		new.Sound:Play()
+		new.MouseButton1Click:Connect(function()
+			new.Click:Play()
+			new.Visible = false
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer.Visible = false
+	elseif ntype == "perror" then
+		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(1,0.666667,0)
+		new.Visible = true
+		new.Error:Play()
+		new.MouseButton1Click:Connect(function()
+			new.Click:Play()
+			new.Visible = false
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer.Visible = false
+	elseif ntype == "pcritical" then
+		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(1, 1, 1)
+		new.BackgroundColor3 = Color3.new(1,0.345098,0.345098)
+		new.Visible = true
+		new.Critical:Play()
+		new.MouseButton1Click:Connect(function()
+			new.Click:Play()
+			new.Visible = false
+			wait(0.3)
+			new:Destroy()
+		end)
+		new.Timer.Visible = false
+	elseif ntype == "pnotification" then
+		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
+		if module.HideMain == false then
+			new.Parent = player.PlayerGui.MainUI.Main
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI.Main:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(0, -111,0, (-54 - 45 * (pos-1)))
+		elseif module.HideMain == true then
+			new.Parent = player.PlayerGui.MainUI
+			new.AnchorPoint = Vector2.new(1,1)
+			local pos = 1
+			local foundpos = false
+			local whichposfound = 0
+			repeat 
+				for _,v in pairs(player.PlayerGui.MainUI:GetChildren()) do
+					if v.Name == "NotificationButton" and v.posnum.Value ~= 0 then
+						if v.posnum.Value == pos then
+							foundpos = true
+						end
+					end
+				end
+				if foundpos == true then
+					pos = pos+1
+					foundpos = false
+				elseif foundpos == false then
+					whichposfound = pos
+				end
+			until foundpos == false and whichposfound ~= 0
+			new.posnum.Value = pos
+			new.Position = UDim2.new(1, -10, 1, (-15 - (45 * (pos-1))))
+		end
+		if module.SeasonalThemes == true then
+			new.decoration.Visible = true
+		else
+			new.decoration.Visible = false
+		end
+		new.Text = nmessage
+		new.TextColor3 = Color3.new(1, 1, 1)
+		new.Visible = true
+		new.Notification:Play()
+		new.MouseButton1Click:Connect(function()
+			new.Click:Play()
+			new.Visible = false
+			wait(1)
+			new:Destroy()
+		end)
+		new.Timer.Visible = false
+	elseif ntype == "welcome" then
 		local new = player.PlayerGui.MainUI.Main.NotificationButton:Clone()
 		if module.HideMain == false then
 			new.Parent = player.PlayerGui.MainUI.Main
@@ -1145,12 +1470,15 @@ function Notify(player,ntype,nmessage)
 			pos = pos+1
 			local bar = clone.ScrollingFrame.command:Clone()
 			bar.Parent = clone.ScrollingFrame
-			bar.Text = v[1].." | "..v[2]
-			if tonumber(v[1]) <= GetLevel(player) then
+			if v[1] == 6 and isOwner(player) or tonumber(v[1]) <= GetLevel(player) then
 				bar.TextColor3 = Color3.fromRGB(255,255,255)
 			else
 				bar.TextColor3 = Color3.fromRGB(155,155,155)
 			end
+			if v[1] == 6 then
+				v[1] = "#"
+			end
+			bar.Text = v[1].." | "..v[2]
 			local newpos = pos*28
 			bar.Position = UDim2.new(UDim.new(0.03,0),UDim.new(0,newpos))
 			clone.ScrollingFrame.CanvasSize = UDim2.new(UDim.new(0,0),UDim.new(0,newpos))
@@ -1171,9 +1499,11 @@ function Notify(player,ntype,nmessage)
 			["Build Version"] = module.BuildVer,
 			["Loader Version"] = module.MadeforBuild,
 			["Internal Build ID"] = internalbuildid,
+			["Current Admin Datastore"] = db.Name,
+			["Default Admin Datastore"] = "Admin_RedefineA",
 		}
 		if gameSecretVisible == true then
-			stuff["Game Secret (Do not share it!)"] = gameSecret
+			stuff["Game Secret"] = gameSecret
 		end
 		for k,v in pairs(stuff) do
 			pos = pos+1
@@ -1489,6 +1819,13 @@ function cmds(plr,command)
 	local arg = splitstring(command," ")
 	local commands = {}
 	local buildreason = nil -- Resets the reason every execution of command. (00E)
+	
+	if arg[1] == "/e" and module.SilentEnabled == true then -- IB 155 : SilentEnabled finally added because my primitive mankeh brain forgot to add this 100 builds ago.
+		for k,v in pairs(arg) do
+			arg[k-1] = v
+			arg[k] = nil
+		end
+	end
 
 	commands[#commands+1] = {2,module.Prefix.."kill [Players]"}
 	if arg[1] == module.Prefix.."kill" then
@@ -1517,6 +1854,46 @@ function cmds(plr,command)
 			return {true,"Successfully killed "..done[1].." people."}
 		else
 			return {true,"Successfully killed "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {2,module.Prefix.."rocket [Players]"}
+	if arg[1] == module.Prefix.."rocket" then
+		if GetLevel(plr) < 2 then
+			return {false,"You do not have permission to execute this command."}
+		end
+
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			v.Character.Humanoid.JumpPower = 1000
+			local fire = Instance.new("Fire")
+			fire.Parent = v.Character:FindFirstChild("HumanoidRootPart")
+			v.Character.Humanoid.Jump = true
+			wait(0.75)
+			v.Character.Humanoid.Health = 0
+			local exp = Instance.new('Explosion')
+			exp.Parent = v.Character:FindFirstChild("Head")
+			exp.Visible = true
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully turned "..done[1].." people into rockets."}
+		elseif done[1] >= 2 then
+			return {true,"Successfully turned "..done[2].." into rockets."}
+		else
+			return {true,"Successfully turned "..done[2].." into a rocket."}
 		end
 	end
 
@@ -3848,6 +4225,98 @@ function cmds(plr,command)
 			return {true,"Successfully got info about "..done[2].."."}
 		end
 	end
+	
+	commands[#commands+1] = {3,module.Prefix.."warn <Players> [Reason]"}
+	if arg[1] == module.Prefix.."warn" then
+		if GetLevel(plr) < 3 then
+			return {false,"You do not have permission to execute this command."}
+		end
+		
+		if not arg[2] then
+			return {false,"You must provide atleast 1 target."}
+		end
+		
+		buildreason = ""
+		if arg[3] then
+			for _,v in pairs(arg) do
+				if v ~= arg[1] and v ~= arg[2] then
+					buildreason = buildreason.." "..v
+				end
+			end
+		else
+			buildreason = "No reason stated."
+		end
+		
+		local targets = module:HandlePlayers(plr.Name,arg[2],2,false)
+		if targets[1] == nil then
+			return {false, "Failed to find anyone of the mentioned players."}
+		elseif targets[1] == false then
+			return {false, targets[2]}
+		end
+		local done = {0,""}
+		for _,v in pairs(targets) do
+			local nwarn = warns[#warns+1]
+			nwarn = {
+				["ID"] = #warns,
+				["Target"] = v.Name,
+				["Moderator"] = plr.Name,
+				["Reason"] = buildreason,
+				["Time"] = os.date("%c",os.time()),
+			}
+			Notify(v,"perror","You have been warned! (Warn ID "..#warns..")")
+			if done[2] ~= "" then
+				done[2] = done[2]..", "..v.Name
+				done[1] = done[1]+1
+			else
+				done[2] = v.Name
+				done[1] = 1
+			end
+		end
+		if done[1] >= 5 then
+			return {true,"Successfully warned "..done[1].." people."}
+		else
+			return {true,"Successfully warned "..done[2].."."}
+		end
+	end
+	
+	commands[#commands+1] = {3,module.Prefix.."warns [Player/ID]"}
+	if arg[1] == module.Prefix.."warns" or arg[1] == module.Prefix.."warnlist" then
+		if not arg[2] then
+			if GetLevel(plr) < 3 then
+				return {false,"You do not have permission to view the warnings list."}
+			end
+		-- These two do not require the level, since they were the ones that got warned.
+		elseif Player(arg[2]).Name == plr.Name then
+			local info = {}
+			for k,v in pairs(warns) do
+				if v["Target"] == plr.Name then
+					info[k] = v["Reason"]
+				end
+			end
+			Notify(plr,"customlist",{plr.Name.."'s Warns",info})
+		elseif warns[tonumber(arg[2])]["Target"] == plr.Name then
+			local info = warns[tonumber(arg[2])]
+			Notify(plr,"customlist",{"Warning "..arg[2],info})
+		-- Now we need a level to protect info about others.
+		elseif Player(arg[2]) then
+			if GetLevel(plr) < 3 then
+				return {false,"You do not have permission to view others' warnings."}
+			end
+			local info = {}
+			for k,v in pairs(warns) do
+				if v["Target"] == Player(arg[2]).Name then
+					info[k] = v["Reason"]
+				end
+			end
+			Notify(plr,"customlist",{Player(arg[2]).Name.."'s Warns",info})
+		elseif warns[tonumber(arg[2])] then
+			if GetLevel(plr) < 3 then
+				return {false,"You do not have permission to view others' warnings."}
+			end
+			local info = warns[tonumber(arg[2])]
+			Notify(plr,"customlist",{"Warning "..arg[2],info})
+		end
+	end
 
 	commands[#commands+1] = {1,module.Prefix.."hat <HatId>"} -- VIP command
 	if arg[1] == module.Prefix.."hat" then
@@ -4063,10 +4532,10 @@ function cmds(plr,command)
 	end
 
 	if sandboxmode == false then
-		commands[#commands+1] = {5,module.Prefix.."settings"}
+		commands[#commands+1] = {6,module.Prefix.."settings"}
 	end
 	if arg[1] == module.Prefix.."settings" and sandboxmode == false then
-		if GetLevel(plr) < 5 then
+		if not isOwner(plr) then
 			return {false,"You do not have permission to execute this command!"}
 		end
 		Notify(plr,"settings",commands)
@@ -4150,13 +4619,14 @@ Your administration flag is ]]..isBan..[[.]]
 			Notify(player,"notification","The server is currently locked, but your admin level has bypassed the lock.")
 		end
 		if isBan == 5 and sandboxmode == false then
+			--Notify(player,"perror","Warning: Internal builds are extremely unstable and can rip your eyes out of the sockets.")
 			if module.UpdateEnabled == true then
 				if isHttpEnabled() == true then
 					local data = HttpService:GetAsync("https://raw.githubusercontent.com/greasemonkey123/Redefine-A/master/LatestVersion.json",true)
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
 						if checkNew.GA_Type ~= "none" then
-							if GetLevel(player) >= checkNew.GA_Level then
+							if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 								Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 							end
 						end
@@ -4176,7 +4646,7 @@ Your administration flag is ]]..isBan..[[.]]
 					local checkNew = HttpService:JSONDecode(data)
 					if checkNew.LatestVersion == module.BuildVer then
 						if checkNew.GA_Type ~= "none" then
-							if GetLevel(player) >= checkNew.GA_Level then
+							if GetLevel(player) >= tonumber(checkNew.GA_Level) then
 								Notify(player,checkNew.GA_Type,checkNew.GlobalAnnouncment)
 							end
 						end
@@ -4346,7 +4816,7 @@ func.OnServerInvoke = (function(plr,invoketype)
 					end
 				end
 			else
-				plr:Kick("An internal server error has occured while attempting to remove "..invoketype[3].." to the Admins list.")
+				plr:Kick("An internal server error has occured while attempting to remove "..invoketype[3].." from the Admins list.")
 				for _,v in pairs(game:GetService("Players"):GetPlayers()) do
 					if GetLevel(v) >= 2 then
 						Notify(v,"critical",plr.Name.." has been kicked for triggering a remote trap.")
@@ -4390,6 +4860,41 @@ event.OnServerEvent:Connect(function(player,verysecretivekey,hmmm)
 			if v.Name == "Notification" or v.Name == "UImsg" or v.Name == "Welcome" then
 				if v.FullFrame.Position.Y.Offset < tonumber(hmmm) then
 					v.FullFrame:TweenPosition(UDim2.new(0.699, 0, 0.876, (v.FullFrame.Position.Y.Offset + 50)),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.25,true)
+				end
+			end
+		end
+	elseif verysecretivekey == "dbedit" then
+		if GetLevel(player) < 5 and not isOwner(player) then
+			for _,v in pairs(game:GetService("Players"):GetPlayers()) do
+				if GetLevel(v) >= 2 then
+					Notify(v,"critical",player.Name.." has been kicked for triggering a remote trap.")
+				end
+			end
+			player:Kick("As much as I'd say I'm impressed you tried, I'm not. The admin is literally open source and you probably exploited that. No. Get out. Don't return here ever again unless you will stop exploiting. Even calling you an exploiter is a bit of a stretch. How about calling you a script kiddie? Oh, no? wL too bad I'm calling you a skid because that's what you are. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id risus magna. Oh! Almost forgot to mention, all of the admins were notified of your silly action.")
+		elseif isOwner(player) then
+			if hmmm[1] == "mg" then
+				Notify(player,"notification","Migrating the current datastore ("..db.Name..") to the new one ("..hmmm[2]..").");
+				local sav = mdb:Save("admincat",hmmm[2])
+				sav:wait()
+				local ndb = dbs:GetCategory(hmmm[2])
+				local AdminList = db:Load("AdminList")
+				AdminList:wait()
+				local AdminListMigrate = ndb:Save("AdminList",AdminList.Data)
+				AdminListMigrate:wait()
+				if AdminListMigrate.Complete and sav.Complete then
+					Notify(player,"done","Migration has finished successfully. No further action is needed.")
+					db = ndb
+				else
+					Notify(player,"critical","An error has occured while migrating datastores. Please try again!")
+				end
+			elseif hmmm[1] == "nmg" then
+				Notify(player,"notification","Changing the datastore without migrating. Please wait.");
+				local sav = mdb:Save("admincat",hmmm[2])
+				sav:wait()
+				if sav.Complete then
+					Notify(player,"done","The datastore has been switched. Please shut down in order to complete it.")
+				else
+					Notify(player,"critical","An error has occured while switching datastores. Please try again.")
 				end
 			end
 		end
