@@ -206,7 +206,7 @@ module.SaveEvery = 3 -- (n)
 	Support for custom commands is here!
 --]]
 
-module.MadeforBuild = 75
+module.MadeforBuild = 1
 env.sandboxmode = false -- Not a setting. Keep it at false. Don't turn it on. This will kill the server (unless it's a free-admin thing).
 
 
