@@ -7,6 +7,8 @@ admin.InitComplete = false
 function admin:Load(setting,env)
 	scache = setting
 	-- Deps
+	env.BuildId = 1
+	env.internalbuildid = 1
 	env.signalservice = require(script.Dependencies.Signal)
 	env.Data = require(script.Dependencies.DataStorage)
 	env.RC3S = require(script.Dependencies.RedefineColor3Strings)
