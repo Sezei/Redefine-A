@@ -28,7 +28,7 @@ end
 
 return {
 	ModuleType = "Command",
-	Usage = "<players>", 
+	Usage = "<players> [value]", 
 	ModName = "damage",
 	Alias = {},
 	Level = 2,
