@@ -1,0 +1,95 @@
+local mod = {}
+
+mod.ModuleType = "Function"
+
+function mod:Unpack(env)
+	function env.GetLevel(player)
+		if env.Admins == nil or not env.Admins then env.Admins = env.Admins end
+		local group = env.Settings.GroupAdmin
+		if game.CreatorType == Enum.CreatorType.User then
+			if player.UserId == game.CreatorId then
+				return 5
+			end
+		elseif game.CreatorType == Enum.CreatorType.Group then
+			local group = game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+			if player.UserId == group.Owner.Id then
+				return 5
+			end
+		end
+		for _,b in pairs(env.Admins.RootAdmins) do
+			if player.UserId == b then
+				return 5
+			end
+		end
+		for _,b in pairs(env.Admins.SuperAdmins) do
+			if group.Enabled == true then
+				if player:GetRankInGroup(group.GroupId) >= group.SuperAdminRank then
+					return 4
+				end
+			end
+			if player.UserId == b then
+				return 4
+			end
+		end
+		for _,b in pairs(env.Admins.Admins) do
+			if group.Enabled == true then
+				if player:GetRankInGroup(group.GroupId) >= group.AdminRank then
+					return 3
+				end
+			end
+			if player.UserId == b then
+				return 3
+			end
+		end
+		for _,b in pairs(env.Admins.Moderators) do
+			if group.Enabled == true then
+				if player:GetRankInGroup(group.GroupId) >= group.ModeratorRank then
+					return 2
+				end
+			end
+			if player.UserId == b then
+				return 2
+			end
+		end
+		for _,b in pairs(env.Admins.VIP) do
+			if group.Enabled == true then
+				if player:GetRankInGroup(group.GroupId) >= group.VIPRank then
+					return 1
+				end
+			end
+			if player.UserId == b then
+				return 1
+			end
+		end
+		for _,b in pairs(env.Admins.Bans) do
+			if player.UserId == b then
+				return -1
+			end
+		end
+		for _,b in pairs(env.Admins.BanLand) do
+			if group.Enabled == true then
+				if player:GetRankInGroup(group.GroupId) == group.BanLandRank then
+					return -99
+				end
+			end
+			if player.UserId == b[1] then
+				return -99
+			end
+		end
+		if env.Settings.VIPAdmin.Enabled == true then
+			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,env.Settings.VIPAdmin.GamepassId) == true then
+				return env.Settings.VIPAdmin.GiveLevel
+			end
+		end
+
+		if env.Settings.VIPAllowed == true or env.Settings.VIPAdmin.Enabled == true then -- Don't care. If you enable VIPAdmin, VIPAllowed should be on as well.
+			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,8197340) == true then
+				return 1
+			end
+		end
+
+		return 0
+	end
+end
+
+return mod
