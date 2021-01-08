@@ -3,7 +3,7 @@
 	"BuildId": 77,
 	"UpdateType": "notification",
 	"LatestCriticalBuild": "75",
-	"GlobalAnnouncment": "",
-	"GA_Type": "none",
+	"GlobalAnnouncment": "Tomorrow, Version 3 will no longer receive updates as Version 4 will be released.",
+	"GA_Type": "error",
 	"GA_Level": "5"
 }
