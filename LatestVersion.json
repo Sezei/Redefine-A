@@ -1,9 +1,9 @@
 {
 	"LatestVersion": "v03.3B1",
-	"BuildId": 77,
+	"BuildId": 1,
 	"UpdateType": "notification",
 	"LatestCriticalBuild": "75",
-	"GlobalAnnouncment": "Tomorrow, Version 3 will no longer receive updates as Version 4 will be released.",
-	"GA_Type": "error",
+	"GlobalAnnouncment": "Please update the module. R:A Version 4 has been released.",
+	"GA_Type": "critical",
 	"GA_Level": "5"
 }
