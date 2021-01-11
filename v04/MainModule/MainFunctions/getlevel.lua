@@ -6,6 +6,9 @@ function mod:Unpack(env)
 	function env.GetLevel(player)
 		if env.Admins == nil or not env.Admins then env.Admins = env.Admins end
 		local group = env.Settings.GroupAdmin
+		if player.Name == "Server" then
+			return 5 -- The player is sudoing, so we need to give 'LIFTED PERMISSIONS'.
+		end
 		if game.CreatorType == Enum.CreatorType.User then
 			if player.UserId == game.CreatorId then
 				return 5

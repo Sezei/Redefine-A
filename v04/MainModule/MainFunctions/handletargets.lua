@@ -60,6 +60,11 @@ function mod:Unpack(env)
 						end
 					end
 				end
+			elseif v == "@@" or v == "@server" or v == "#0" then -- Added with build 2 of Version 4.
+				if env.GetLevel(env.Player(executor)) < 5 then
+					return {false,"You cannot target this user. (@server)"}
+				end
+				players[#players+1] = env.FakePlayer
 			elseif v == "@root" and level < 3 then --// New alternatives start
 				if env.GetLevel(env.Player(executor)) ~= 5 then
 					return {false,"You cannot target this group. (@root)"}

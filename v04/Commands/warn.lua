@@ -22,14 +22,14 @@ OnFire = function(plr,arg,env)
 	end
 	local done = {0,""}
 	for _,v in pairs(targets) do
-		warns[#warns+1] = {
-			["ID"] = #warns+1,
+		env.warns[#env.warns+1] = {
+			["ID"] = #env.warns+1,
 			["Target"] = v.Name,
 			["Moderator"] = plr.Name,
 			["Reason"] = buildreason,
 			["Time"] = os.date("%c",os.time()),
 		}
-		env.Notify(v,"perror","You have been warned! (Warn ID "..(#warns)..")")
+		env.Notify(v,"perror","You have been warned! (Warn ID "..(#env.warns)..")")
 		if done[2] ~= "" then
 			done[2] = done[2]..", "..v.Name
 			done[1] = done[1]+1
@@ -46,7 +46,8 @@ OnFire = function(plr,arg,env)
 end
 
 function OnLoad(env)
-	warns = env.cmdstorage.warns;
+	env.cmdstorage.warns = {};
+	env.warns = env.cmdstorage.warns;
 end
 
 return {

@@ -1,5 +1,5 @@
 OnFire = function(plr,arg,env)
-	local targets = env.HandlePlayers(plr.Name,arg[2],2,false)
+	local targets = env.HandlePlayers(plr.Name,arg[2],0,false)
 	if targets[1] == nil then
 		return {false, env.CurrentLanguage.CommandExec.NoFound}
 	elseif targets[1] == false then
@@ -18,6 +18,8 @@ OnFire = function(plr,arg,env)
 			safechat = true
 		elseif scres == "C7RN" then
 			safechat = false
+		else
+			safechat = false
 		end
 		local info = {
 			["UserId"] = tostring(v.UserId),
@@ -27,6 +29,15 @@ OnFire = function(plr,arg,env)
 			["Level"] = tostring(env.GetLevel(v)),
 			["SafeChat"] = tostring(safechat),
 		}
+		if env.warns then -- This is a great example of commands extending each other. Warns -> Info
+			local warns = 0
+			for k,v in pairs(env.warns) do
+				if v["Target"] == v.Name then
+					warns = warns+1
+				end
+			end
+			info["Amount of Warnings"] = warns
+		end
 		env.Notify(plr,"customlist",{v.Name,info})
 		if done[2] ~= "" then
 			done[2] = done[2]..", "..v.Name
