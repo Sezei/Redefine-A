@@ -3,7 +3,7 @@
 	"BuildId": 1,
 	"UpdateType": "notification",
 	"LatestCriticalBuild": "75",
-	"GlobalAnnouncment": "Please update the module. R:A Version 4 has been released.",
+	"GlobalAnnouncment": "R:A Version 3 will no longer receive updates except for security patches. Please update the loader.",
 	"GA_Type": "critical",
 	"GA_Level": "5"
 }
