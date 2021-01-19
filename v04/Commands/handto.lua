@@ -20,7 +20,7 @@ OnFire = function(plr,arg,env)
 			return {false,env.CurrentLanguage.CommandExec.NoPerm}
 		end
 	else
-		return {false,"The command has been marked as inactive and is unfunctionl."}
+		return {false,"The command has been marked as inactive, and is unfunctional."}
 	end
 end
 

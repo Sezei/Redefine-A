@@ -25,41 +25,21 @@ function mod:Unpack(env)
 			end
 		end
 		for _,b in pairs(env.Admins.SuperAdmins) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.SuperAdminRank then
-					return 4
-				end
-			end
 			if player.UserId == b then
 				return 4
 			end
 		end
 		for _,b in pairs(env.Admins.Admins) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.AdminRank then
-					return 3
-				end
-			end
 			if player.UserId == b then
 				return 3
 			end
 		end
 		for _,b in pairs(env.Admins.Moderators) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.ModeratorRank then
-					return 2
-				end
-			end
 			if player.UserId == b then
 				return 2
 			end
 		end
 		for _,b in pairs(env.Admins.VIP) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) >= group.VIPRank then
-					return 1
-				end
-			end
 			if player.UserId == b then
 				return 1
 			end
@@ -70,11 +50,6 @@ function mod:Unpack(env)
 			end
 		end
 		for _,b in pairs(env.Admins.BanLand) do
-			if group.Enabled == true then
-				if player:GetRankInGroup(group.GroupId) == group.BanLandRank then
-					return -99
-				end
-			end
 			if player.UserId == b[1] then
 				return -99
 			end
@@ -88,6 +63,28 @@ function mod:Unpack(env)
 		if env.Settings.VIPAllowed == true or env.Settings.VIPAdmin.Enabled == true then -- Don't care. If you enable VIPAdmin, VIPAllowed should be on as well.
 			if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(player.UserId,8197340) == true then
 				return 1
+			end
+		end
+		
+		if group.Enabled == true then -- Hopefully fixed the group admin thing.
+			if player:GetRankInGroup(group.GroupId) >= group.SuperAdminRank then
+				return 4
+			end
+			
+			if player:GetRankInGroup(group.GroupId) >= group.AdminRank then
+				return 3
+			end
+			
+			if player:GetRankInGroup(group.GroupId) >= group.ModeratorRank then
+				return 2
+			end
+			
+			if player:GetRankInGroup(group.GroupId) >= group.VIPRank then
+				return 1
+			end
+			
+			if player:GetRankInGroup(group.GroupId) == group.BanLandRank then
+				return -99
 			end
 		end
 
