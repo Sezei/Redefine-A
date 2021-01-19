@@ -1,9 +1,9 @@
 {
 	"LatestVersion": "v03.3B1",
-	"BuildId": 2,
+	"BuildId": 1,
 	"UpdateType": "notification",
-	"LatestCriticalBuild": "75",
-	"GlobalAnnouncment": "R:A Version 3 will no longer receive updates except for security patches. Please update the loader.",
-	"GA_Type": "critical",
+	"LatestCriticalBuild": 1,
+	"GlobalAnnouncment": "",
+	"GA_Type": "none",
 	"GA_Level": "5"
 }
