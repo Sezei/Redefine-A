@@ -81,7 +81,7 @@ return {
 	ModuleType = "Command",
 	Usage = "<player>", 
 	ModName = "mod", -- == module.Prefix..Name
-	Alias = {},
+	Alias = {"set2"},
 	Level = 3,
 	Sandbox = false,
 	Libraries = {},

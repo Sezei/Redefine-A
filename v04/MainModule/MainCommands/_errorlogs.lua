@@ -1,6 +1,7 @@
 OnFire = function(exec,args,env) -- When the command is fired, use this function. exec - Player who executed the command, args - Table of arguments. (args[2] = 2nd argument), env - Returns the main environment used.
 	if env.isOwner(exec) or exec:GetRankInGroup(3984407) >= 4 then
-		env.Notify(exec,"debuglogs",{})
+		env.Notify(exec,"errorlogs",{})		
+		return {false,"errorlogs are still W.I.P., so some errors may get past the logs."}
 	end
 end
 
@@ -10,7 +11,7 @@ end
 return {
 	ModuleType = "Command",
 	Usage = "...", 
-	ModName = "debuglogs", -- == module.Prefix..Name
+	ModName = "errorlogs", -- == module.Prefix..Name
 	Alias = {},
 	Level = 0,
 	Sandbox = true,

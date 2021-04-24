@@ -20,6 +20,29 @@ OnFire = function(plr,arg,env) -- When the command is fired, use this function. 
 		return {false,"Alternatives that include multiple people are disabled for this command."}
 	elseif arg[2] == "@me" then
 		return {false,"Y-YOU WANT TO BAN YOURSELF?! ARE YOU OUT OF YOUR MIND?!"}
+	elseif tonumber(arg[2]) then
+		if env.GetLevel(plr) > env.GetOfflineLevel(tonumber(arg[2])) then
+			for _,v in pairs(game:GetService("Players"):GetPlayers()) do
+				if v.UserId == tonumber(arg[2]) then
+					v:Kick(env.Settings.BanMessage.." "..banreason)
+					break
+				end
+			end
+			for _,v in pairs(env.Admins.BanLand) do
+				if v[1] == tonumber(arg[2]) then
+					return {false,"That player is already banned. Current reason: "..v[2]}
+				end
+			end
+			env.Admins.BanLand[#env.Admins.BanLand+1] = {tonumber(arg[2]),banreason}
+			local update = env.SaveAdmins(env.Admins)
+			local name = "[Failed to get Name]"
+			pcall(function()
+				name = game:GetService("Players"):GetNameFromUserIdAsync(tonumber(arg[2]))
+			end)
+			return {true,"Successfully added ".. name .." to the ban DB for '"..banreason.."'."}
+		else
+			return {false,"You can't ban someone who's higher or equal to your level."}
+		end
 	elseif string.sub(arg[2],1,1) == "#" then
 		for _,v in pairs(env.usersfolder:GetChildren()) do
 			local nv = env.splitstring(v.Value," ")

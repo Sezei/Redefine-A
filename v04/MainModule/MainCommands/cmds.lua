@@ -1,5 +1,9 @@
 OnFire = function(exec,args,env) -- When the command is fired, use this function. exec - Player who executed the command, args - Table of arguments. (args[2] = 2nd argument), env - Returns the main environment used.
-	env.Notify(exec,"cmds",env.Commands)
+	if not args[2] then
+		env.Notify(exec,"cmds",env.Commands)
+	elseif string.lower(args[2]) == "-all" then
+		env.Notify(exec,"allcmds",env.Commands)
+	end
 	return {true,"Showing the loaded "..(#env.Commands).." commands."}
 end
 

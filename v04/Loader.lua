@@ -1,4 +1,4 @@
---[[																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									--]]local module = {};--[[ stop looking at places you're not supposed to be in :(																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																				Hello!
+--[[
    _____ _             _ _         ______             _ 
   / ____| |           | (_)       |  ____|           (_)
  | (___ | |_ _   _  __| |_  ___   | |__   _ __   __ _ _ 
@@ -12,7 +12,7 @@
 -----------			Full Release of V.04			-----------
 ---------------------------------------------------------------
 
-Copyright Protected © Studio Engi, EngiAdurite and the Lead Contributors, 2020.
+Copyright Protected © Studio Engi, EngiAdurite and the Lead Contributors, 2021.
 Refer to the Internal Use Info & License for more info.
 
 Thank you for using a fine product made by Studio Engi.
@@ -20,6 +20,14 @@ All of the products made by Studio Engi are and always will be Open Source.
 To provide the best experience using your product, please follow the included instructions.
 
 Warning: Redefine:A Plugins WILL NOT be applicable for Copyright unless they are open source and without any require()'s!
+
+--------------------------------------------------------------
+
+A setting up thread was made in Devforums in order to show how to setup correctly R:A to use it's performance
+and modularity potential to it's fullest.
+
+You can read about it more here;
+https://devforum.roblox.com/t/redefine-a-setting-up-r-a-correctly/1171278
 
 --------------------------------------------------------------
 
@@ -76,6 +84,8 @@ Studio Engi AGB Global Banlist by EngiAdurite 			| Optional External Banlist.
 
 Roundify by Stelrex										| Better UI Build.
 
+SignalService by Quenty									| Easier internal communication between the modules.
+
 Easy DataStorage Manager by VolcanoINC					| Easier Datastorage Access.
 
 Zeus Admin by TheKitDev									| This is literally the very Deluxe version of Zeus Admin.
@@ -86,24 +96,26 @@ Zeus Admin by TheKitDev									| This is literally the very Deluxe version of Z
 Credits;
 
 Lead(s):
-	@EngiAdurite			| Head of Project, Head Scripter
-	@Yes_Cone				| Head UI Designer
-	@Cytronyx				| R:A Staff Member, Contributions for the code
-	@ShhhhhhhhhhhBro		| R:A Staff Member
-	@AshenRed				| R:A Staff Member
+	@EngiAdurite			| Project Lead
+	@Cytronyx				| R:A Staff Member @ V03 - V04, Contributions for the code @ V03
+	@ShhhhhhhhhhhBro		| R:A Staff Member @ V03 - V04
+	@AshenRed				| R:A Staff Member @ V03 - V04
 
 Contributor(s): 
-	Most contributors will get access to the private loader upon release.
+	Thanks to all of you. Everyone in the list here have helped me create the admin in one way or another.
 	-------------------------------------------------------
-	@decipheringcode		| Pre-Alpha Tester
-	@thebluepenguin1		| Pre-Alpha Tester
+	@Yes_Cone				| Head UI Designer @ V00A - V02#1
 	@Pristh 				| Alpha Contribution
 	@WolfieTheDino			| Alpha Contribution
 	@Bad_BunnyBabyXD		| Post-Alpha Contribution
 	@Meqpi					| Post-Alpha Contribution
-	@TheKitDev				| Personal Thanks for the idea of Zeus Admin Deluxe
+	@Swinsor				| Post-Alpha Contribution
+	@TheKitDev				| Personal thanks for the idea of Zeus Admin Deluxe (Which is what this thing was originally supposed to be)
+	@crywink				| Inspiration for the V04 modular design
+	@decipheringcode		| Pre-Alpha Tester
+	@thebluepenguin1		| Pre-Alpha Tester
 	Steamin' Beans 			| Alpha Testing Ground
-	@alfivq					| Alpha Testing Ground
+	@alfivq					| Alpha Testing Ground Provider
 	@limesouls				| Alpha & Post-Alpha Tester
 	@HonestlyEllie			| Alpha Tester
 	@fmprej192				| Alpha Tester
@@ -136,20 +148,21 @@ External Materials Owner(s):
 
 --------------------------------------------------------------
 
-This is the prototype loader of Redefine:A v04.
-This prototype is not to be confused with R:A v03, as it'll be completely different.
-
 !!! MAKE SURE THE LOADER IS IN SERVERSCRIPTSERVICE !!!
 ]]
 
+if script.Parent.Name ~= "ServerScriptService" then
+	script.Parent = game:GetService("ServerScriptService"); warn("R:A | Why not place the loader into ServerScriptService? It's waaay better that way.")
+end
+
 starttick = tick();
-AutoUpdate = {false,5900263444} -- Whether or not should it auto update. If yes, what ID? Default: {true,5900263444}
 env = getfenv() -- :)
 
 module = {} -- Make everything a table, so it'll be easier to load.
 
 module.Prefix = "!" -- The prefix.
 module.SilentEnabled = false -- Currently unused. Allows "/e (prefix)(command)" usage.
+module.PreferredMethod = "sm" -- SM / SourceMod: @all, @others, @me | MC / Minecraft: @a, @o, @s | S / Simple: all, others, me
 
 module.Admins = { --Keep in mind, this is working for only ONE TIME. If you will want to reset it, change the name of the db. (db = dbs:GetDataStore("NAMEHERE"))
 	RootAdmins = {253925749,-1}, --Admins with level 5 permissions. No restrictions apply.
@@ -180,14 +193,20 @@ module.VIPAdmin = {
 
 module.Separator = "|" -- Allows you to separate a single message into multiple commands as long as they all start with the prefix.
 module.AllowVIP = true -- Allow those who donated a not-so-small amout to Studio Engi enjoy a free VIP (Level 1) admin in your game.
-module.Theme = "Source" -- You can pick your custom theme here!
+module.Theme = "Source" -- You can pick your custom theme here! Deprecated.
 module.BanMessage = "[R:A] You're banned from this game;"
 module.DefaultBanReason = "No reason has been stated."
+module.SuppressErrors = false
 module.EnableGlobalBanList = false -- Enable AGB Banlist, which automatically bans exploiters, alts, etc. Default is true.
 module.Language = "English" -- Nope.
 module.HideMain = false -- Hide the clock at the bottom. Will likely break the desktop because of the lack of clock.
 module.SeasonalThemes = true -- Show a theme specific to the season / date. April fools anyone? :)
 module.FilterText = true -- By default, thanks to Roblox, this is now true. You can disable this, but you will be at risk to getting your game raided by the moderation team.
+module.RelevelCommands = { -- Use this to re-level MAIN commands without forking the whole command, thus disabling their auto-update abilities.
+	["somecommand"] = 5,
+	-- Template:
+	-- ["commandone"] = level, ["commandtwo"] = level,...
+}
 module.DisabledCommands = { -- Use this to disable MAIN commands without forking the whole module. AGAIN: MAIN COMMANDS ONLY.
 	-- This can be used to either replace the main commands with custom ones or disable them completely.
 	-- The only commands that are immune: settings, cmds and lpid.
@@ -200,18 +219,33 @@ module.DisabledCommands = { -- Use this to disable MAIN commands without forking
 -- No longer private, but it's just because it's broken. :(
 module.AutomaticAdminSave = true -- Saves the adminlist automatically every (n) minutes.
 module.SaveEvery = 3 -- (n)
+module.AutoUpdate = {false,6210489276} -- Whether or not should it auto update. If yes, what ID?
+module.AllowDisplayNames = true -- Allows usage of DisplayNames. Default: true
+module.UsernameUsage = "*" -- If AllowDisplayNames is true, you need to still somehow target a player with usernames. Default: "*"
+module.Remote_Key = "" -- Not required, but please keep it as something random. Will be used soon.
 
 --[[
 	Please do not edit anything below this line unless you know what you're doing.
 	Support for custom commands is here!
 --]]
 
-module.MadeforBuild = 1
+module.MadeforBuild = 16
+
 env.sandboxmode = false -- Not a setting. Keep it at false. Don't turn it on. This will kill the server (unless it's a free-admin thing).
 
 
 -------- NO TOUCHY
-admin = require(script.MainModule) -- Get the table of the admin.
+if module.AutoUpdate[1] == false then
+	admin = require(script.MainModule)
+elseif module.AutoUpdate[1] == true then
+	admin = require(module.AutoUpdate[2])
+end
+if not admin then -- Admin failed to load? Resort to the MainModule inside the script, in that case.
+	admin = require(script.MainModule)
+end
+
+-- if there's still no admin to load from, this will error.
+
 load = admin:Load(module,env) -- Will return the script itself, so we can now forcefully parent it into the loader.
 load.Parent = script -- This will help with loading the addons.
 repeat wait() until  admin.LoadComplete == true -- Wait until the admin loads so we can initiate it.

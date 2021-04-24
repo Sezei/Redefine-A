@@ -28,7 +28,31 @@ function mod:Unpack(env)
 					return true
 				end
 			elseif type(invoketype) == "table" then
-				if invoketype[1] == "ClientPing" then
+				if invoketype[1] == "uisave" then
+					local sav = env.mdb:Save("RAUI_"..plr.UserId,invoketype[2]) -- We need to save it in the MDB because it's players' choice, and shouldn't be interfered by admin resets & changes.
+					sav:wait()
+					if sav.Complete then
+						return true
+					else
+						return false
+					end
+				elseif invoketype[1] == "uiload" then
+					local lod = env.mdb:Load("RAUI_"..plr.UserId) -- We need to save it in the MDB because it's players' choice, and shouldn't be interfered by admin resets & changes.
+					lod:wait()
+					if lod.Data then
+						return {lod.Data,env.Settings.HideMain}
+					else
+						return {nil,env.Settings.HideMain}
+					end
+				elseif invoketype[1] == "SecuritySettings_DebugDisabled" then
+					if env.isOwner(plr) then
+						local sav = env.db:Save("DebugDisabled",invoketype[2])
+						sav:wait()
+						return true
+					else
+						return false
+					end
+				elseif invoketype[1] == "ClientPing" then
 					local stc = invoketype[2]
 					local cts = tick() - invoketype[3]
 					local diff = invoketype[4]
@@ -76,10 +100,10 @@ function mod:Unpack(env)
 						end
 					else
 						plr:Kick("An internal server error has occured while attempting to add "..plr.Name.." to the Admins list.")
+						env.exploitlogs[#env.exploitlogs+1] = (plr.Name.." | Info: Triggered remote trap | Action: Automatic Kick")
 						for _,v in pairs(game:GetService("Players"):GetPlayers()) do
 							if env.GetLevel(v) >= 2 then
 								env.Notify(v,"critical",plr.Name.." has been kicked for triggering a remote trap.")
-								env.exploitlogs[#env.exploitlogs+1] = (plr.Name.." | Info: Triggered remote trap | Action: Automatic Kick")
 							end
 						end
 					end
@@ -144,10 +168,10 @@ function mod:Unpack(env)
 						end
 					else
 						plr:Kick("An internal server error has occured while attempting to remove "..invoketype[3].." from the Admins list.")
+						env.exploitlogs[#env.exploitlogs+1] = (plr.Name.." | Info: Triggered remote trap | Action: Automatic Kick")
 						for _,v in pairs(game:GetService("Players"):GetPlayers()) do
 							if env.GetLevel(v) >= 2 then
 								env.Notify(v,"critical",plr.Name.." has been kicked for triggering a remote trap.")
-								env.exploitlogs[#env.exploitlogs+1] = (plr.Name.." | Info: Triggered remote trap | Action: Automatic Kick")
 							end
 						end
 					end

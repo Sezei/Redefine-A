@@ -16,17 +16,17 @@ OnFire = function(exec,args,env) -- When the command is fired, use this function
 							end
 							for k,v in pairs(env.Admins.SuperAdmins) do
 								if v == p.UserId then
-									env.Admins.SuperAdmins[k] = nil
+									table.remove(env.Admins.SuperAdmins,k)
 								end
 							end
 							for k,v in pairs(env.Admins.Admins) do
 								if v == p.UserId then
-									env.Admins.Admins[k] = nil
+									table.remove(env.Admins.Admins,k)
 								end
 							end
 							for k,v in pairs(env.Admins.Moderators) do
 								if v == p.UserId then
-									env.Admins.Moderators[k] = nil
+									table.remove(env.Admins.Moderators,k)
 								end
 							end
 							return {true,p.Name.." has been unadmined."}
@@ -54,17 +54,17 @@ OnFire = function(exec,args,env) -- When the command is fired, use this function
 					end
 					for k,v in pairs(env.Admins.SuperAdmins) do
 						if v == p.UserId then
-							env.Admins.SuperAdmins[k] = nil
+							table.remove(env.Admins.SuperAdmins,k)
 						end
 					end
 					for k,v in pairs(env.Admins.Admins) do
 						if v == p.UserId then
-							env.Admins.Admins[k] = nil
+							table.remove(env.Admins.Admins,k)
 						end
 					end
 					for k,v in pairs(env.Admins.Moderators) do
 						if v == p.UserId then
-							env.Admins.Moderators[k] = nil
+							table.remove(env.Admins.Moderators,k)
 						end
 					end
 					return {true,p.Name.." has been unadmined."}
@@ -95,7 +95,7 @@ return {
 	ModuleType = "Command",
 	Usage = "<player>", 
 	ModName = "unadmin", -- == module.Prefix..Name
-	Alias = {},
+	Alias = {"removeadmin","set0"},
 	Level = 4,
 	Sandbox = false,
 	Libraries = {},

@@ -8,7 +8,7 @@ end
 
 return {
 	ModuleType = "Command",
-	Usage = "(You are viewing them right now)", 
+	Usage = "", 
 	ModName = "chatlogs", -- == module.Prefix..Name
 	Alias = {"chats"},
 	Level = 2,

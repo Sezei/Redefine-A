@@ -1,6 +1,10 @@
 OnFire = function(plr,arg,env) -- When the command is fired, use this function. exec - Player who executed the command, args - Table of arguments. (args[2] = 2nd argument), env - Returns the main environment used.
-	env.Notify(plr,"bans",{})
-	return {true,"Showing all banned players."}
+	local bans_shown = env.Notify(plr,"bans",{})
+	if bans_shown then
+		return {true,"Showing all banned players."}
+	else
+		return {false,"There are no bans to show."}
+	end
 end
 
 OnLoad = function(env) -- When the module is loaded, use this function. Since it's a command, we don't really need it.
@@ -11,7 +15,7 @@ return {
 	Usage = "", 
 	ModName = "banlist", -- == module.Prefix..Name
 	Alias = {"bans"},
-	Level = 0,
+	Level = 3,
 	Sandbox = true,
 	Libraries = {},
 	Dependencies = {},

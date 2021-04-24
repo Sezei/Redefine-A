@@ -81,7 +81,7 @@ return {
 	ModuleType = "Command",
 	Usage = "<player>", 
 	ModName = "superadmin", -- == module.Prefix..Name
-	Alias = {"super"},
+	Alias = {"super","set4"},
 	Level = 5,
 	Sandbox = false,
 	Libraries = {},

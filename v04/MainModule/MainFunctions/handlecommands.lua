@@ -13,7 +13,7 @@ function mod:Unpack(env)
 					arg[k-1] = v
 					arg[k] = nil
 				end
-			end 
+			end
 			
 			for _,v in pairs(env.Commands) do
 				local alias = false
@@ -24,12 +24,18 @@ function mod:Unpack(env)
 					end
 				end
 					
-				if arg[1] == env.Settings.Prefix .. v.ModName or alias == true then
+				if string.lower(arg[1]) == env.Settings.Prefix .. string.lower(v.ModName) or alias == true then
+					if ((string.lower(arg[1]) == env.Settings.Prefix .. "announce") and (plr.Name == "Server")) then -- Avoid an infinite loop.
+						return
+					end
 					if (env.sandboxmode == true and v.Sandbox == true) or env.sandboxmode == false then
 						if (env.GetLevel(plr) < v.Level) and not (v.Level == 6 and env.isOwner(plr)) then
 							responses[#responses+1] = {false,env.CurrentLanguage.CommandExec.NoPerm}
 						else
-							env.CommandFired:Fire(plr,msg) -- For webhook stuff idk
+							if not v._debug then -- Debug commands are not supposed to return anything to the players around them, which is why they are suppressed.
+								env.CommandFired:Fire(plr,msg) -- For webhook stuff idk
+								env.addCmdlog(plr,msg)
+							end
 							responses[#responses+1] = v.ModFunction(plr,arg,env)
 						end
 					end
